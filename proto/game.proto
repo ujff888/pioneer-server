@@ -1,0 +1,1138 @@
+import "global.proto";
+import "gameRes.proto";
+
+package litgame.game;
+
+option java_package = "cn.litgame.wargame.core.auto";
+option java_outer_classname = "GameProtos";
+
+message MessageBody{
+	required MessageType messageType = 1;
+	required MessageCode messageCode = 2;
+	
+	optional string sessionKey = 4;//用来描述一个会话的标识，login成功后返回，每次cs请求都的携带
+	
+	//MSG_ID_CHECK_VERSION
+	optional CSCheckVersion csCheckVersion = 8;
+	optional SCCheckVersion scCheckVersion = 9;
+	
+	//MSG_ID_LOGIN
+	optional CSLogin csLogin = 10;
+	optional SCLogin scLogin = 11;
+
+	//MSG_ID_PING,客户端的资源面板由服务器刷新，暂定10秒发ping包，服务器返回最新的游戏数据
+	optional CSPing csPing = 12;
+	optional SCPing scPing = 13;
+	
+	//MSG_ID_CREATE_PLAYER
+	optional CSCreatePlayer csCreatePlayer = 14;
+	optional SCCreatePlayer scCreatePlayer = 15;
+	
+	//MSG_ID_BUILD_LEVEL_UP
+	optional CSBuildLevelUp csBuildLevelUp = 16;
+	optional SCBuildLevelUp scBuildLevelUp = 17;
+
+	//MSG_ID_BUILD_SHOW
+	optional CSShowBuild csShowBuild = 18;
+	optional SCShowBuild scShowBuild = 19;
+	
+	//MSG_ID_STUDY_TECH
+	optional CSStudyTech csStudyTech = 20;
+	optional SCStudyTech scStudyTech = 21; 
+	
+	//MSG_ID_LAND_DONATION 
+	optional CSLandDonation csLandDonation = 22;
+	optional SCLandDonation scLandDonation = 23;
+	
+	//MSG_ID_PRODUCTION_TROOP 
+	optional CSProductionTroop csProductionTroop = 24;
+	optional SCProductionTroop scProductionTroop = 25;
+	
+	//MSG_ID_BUY_SHIP 
+	optional CSBuyShip csBuyShip = 26;
+	optional SCBuyShip scBuyShip = 27;
+	
+	//MSG_ID_SHOW_CITY 
+	optional CSShowCity csShowCity = 28;
+	optional SCShowCity scShowCity = 29;
+	
+	//MSG_ID_SHOW_LAND 
+	optional CSShowLand csShowLand = 30;
+	optional SCShowLand scShowLand = 31;
+	
+	//MSG_ID_SHOW_WORLD
+	optional CSShowWorld csShowWorld = 32;
+	optional SCShowWorld scShowWorld = 33;
+	
+	//MSG_ID_PAYMENT
+	optional CSPayment csPayment = 34;
+	optional SCPayment scPayment = 35;	
+
+	//MSG_ID_CREATE_BUILDING
+	optional CSCreateBuilding csCreateBuilding = 36;
+	optional SCCreateBuilding scCreateBuilding = 37;
+	
+	//MSG_ID_BIND_ACCOUNT
+	optional CSBindAccount csBindAccount = 52;
+	optional SCBindAccount scBindAccount = 53;
+	
+	//MSG_ID_NEW_PLAYER_PROGRESS = 1025;//新手指导进度
+	optional CSNewPlayerProgress csNewPlayerProgress = 54;
+	optional SCNewPlayerProgress scNewPlayerProgress = 55;	
+
+	//MSG_ID_SHOW_LAND_RESOURCE
+	optional CSShowLandResource csShowLandResource = 56;
+	optional SCShowLandResource scShowLandResource = 57;
+	
+	//MSG_ID_SPEEDY_BUILDING
+	optional CSSpeedyBuilding csSpeedyBuilding = 58;
+	optional SCSpeedyBuilding scSpeedyBuilding = 59;
+	
+	//MSG_ID_CHECK_BUILD
+	optional CSCheckBuild csCheckBuild = 60;
+	optional SCCheckBuild scCheckBuild= 61;
+	
+	//MSG_ID_SET_WORKER
+	optional CSSetWorker csSetWorker = 62;
+	optional SCSetWorker scSetWorker = 63;
+	
+	//MSG_ID_SET_PUB_LEVEL
+	optional CSSetPubLevel csSetPubLevel = 64;
+	optional SCSetPubLevel scSetPubLevel = 65;
+	
+	//MSG_ID_SET_TECHER
+	optional CSSetTecher csSetTecher = 66;
+	optional SCSetTecher scSetTecher = 67;
+	
+	//MSG_ID_SHOW_TECH_BUILD
+	optional CSShowTechBuild csShowTechBuild = 68;
+	optional SCShowTechBuild scShowTechBuild = 69;
+
+	//MSG_ID_SHOW_TECH_PROGRESS
+	optional CSShowTechProgress csShowTechProgress = 70;
+	optional SCShowTechProgress scShowTechProgress = 71;
+	
+	//MSG_ID_CHANGE_CITY_NAME
+	optional CSChangeCityName csChangeCityName = 72;
+	optional SCChangeCityName scChangeCityName = 73;
+	
+	//MSG_ID_CREATE_CITY
+	optional CSCreateCity csCreateCity = 76;
+	optional SCCreateCity scCreateCity = 77;
+	
+	//MSG_ID_MOVE_CITY
+	optional CSMoveCity csMoveCity = 78;
+	optional SCMoveCity scMoveCity = 79;
+	
+	//MSG_ID_CANCEL_PRODUCTION_TROOP
+	optional CSCancelProductionTroop csCancelProductionTroop = 80;
+	optional SCCancelProductionTroop scCancelProductionTroop = 81;
+	
+	//MSG_ID_DISBAND_TROOP
+	optional CSDisbandTroop csDisbandTroop = 82;
+	optional SCDisbandTroop scDisbandTroop = 83;
+	
+	//MSG_ID_SET_CAPITAL
+	optional CSSetCapital csSetCapital = 84;
+	optional SCSetCapital scSetCapital = 85;
+	
+	//MSG_ID_CHANGE_SYSTEM
+	optional CSChangeSystem csChangeSystem = 86;
+	optional SCChangeSystem scChangeSystem = 87;
+	
+	//MSG_ID_GET_PLAYER_PACKITEM
+	optional CSGetItemPack csGetItemPack = 88;
+	optional SCGetItemPack scGetItemPack = 89;
+	
+	//MSG_ID_GET_SHOP_SHELF
+	optional CSGetShopShelf csShopPack = 90;
+	optional SCGetShopItem scShopPack = 91;
+	
+	//MSG_ID_SHOW_BUY_SHIP
+	optional CSShowBuyShip csShowBuyShip = 92;
+	optional SCShowBuyShip scShowBuyShip = 93;
+	
+	//MSG_ID_SHOW_KING_INFO
+	optional CSShowKingInfo csShowKingInfo = 94;
+	optional SCShowKingInfo scShowKingInfo = 95;
+	
+	//MSG_ID_SHOW_RANK
+	optional CSShowRank csShowRank = 96;
+	optional SCShowRank scShowRank = 97;
+	
+	//MSG_ID_CANCEL_TRANSPORT_TASK
+	optional CSCancelTransportTask csCancelTransportTask = 98;
+	optional SCCancelTransportTask scCancelTransportTask = 99;
+	
+	//MSG_ID_START_TRANSPORT_TASK
+	optional CSStartTransportTask csStartTransportTask = 100;
+	optional SCStartTransportTask scStartTransportTask = 101;
+	
+	//MSG_ID_OVER_TRANSPORT_TASK
+	optional CSOverTransportTask csOverTransportTask = 102;
+	optional SCOverTransportTask scOverTransportTask = 103;
+	
+	//MSG_ID_BUY_PERSON
+	optional CSBuyPerson csBuyPerson = 104;
+	optional SCBuyPerson scBuyPerson = 105;
+	
+
+	//MSG_ID_QUERY_MARKET_ORDER//市场3个面板的信息
+	optional CSQueryMarketOrder csQueryMarketOrder = 106;
+	optional SCQueryMarketOrder scQueryMarketOrder = 107;
+	
+	//MSG_ID_CREATE_CITY_ORDER//创建我的订单//点发布
+	optional CSCreateCityOrderInfo csCreateCityOrderInfo = 108;
+	optional SCCreateCityOrderInfo scCreateCityOrderInfo = 109;
+	
+	//MSG_ID_SHOW_MY_ORDER//显示我的订单
+	optional CSShowMyOrderInfo csShowMyOrderInfo = 110;
+	optional SCShowMyOrderInfo scShowMyOrderInfo = 111;	
+
+	//MSG_ID_GM_COMMAND
+	optional CSGmCommand csGmCommand = 112;
+	optional SCGmCommand scGmCommand = 113;
+
+	//MSG_ID_DEAL
+	optional CSDeal csDeal = 114;
+	optional SCDeal scDeal = 115;
+	
+	//MSG_ID_MILITARY_INFO
+	optional CSMilitaryInfo csMilitaryInfo = 116;
+	optional SCMilitaryInfo scMilitaryInfo = 117;
+	
+	//MSG_ID_MILITARY_ACTION
+	optional CSMilitaryAction csMilitaryAction = 118;
+	optional SCMilitaryAction scMilitaryAction = 119;
+	
+	//MSG_ID_BATTLE_LIST
+	optional CSBattleList csBattleList = 120;
+	optional SCBattleList scBattleList = 121;
+	
+	//MSG_ID_ROUND_LIST
+	optional CSRoundList csRoundList = 122;
+	optional SCRoundList scRoundList = 123;
+
+	//MSG_ID_ROUND_DETAIL
+	optional CSRoundDetail csRoundDetail = 124;
+	optional SCRoundDetail scRoundDetail = 125;
+	
+	//MSG_ID_BATTLE_DETAIL
+	optional CSBattleDetail csBattleDetail = 126;
+	optional SCBattleDetail scBattleDetail = 127;
+ 	
+	//下面的都是公共接口
+	optional SCCommonsMessage scCommonsMessage = 1000;
+	optional SCGameNotice scGameNotice = 1001;
+	optional SCUpdateResource scUpdateResource = 1002;
+	optional SCUpdatePlayerInfo scUpdatePlayerInfo = 1003;
+	optional SCUpdateTroopInfo scUpdateTroopInfo = 1004;
+	
+	optional bool needUpdateResource = 1005;
+}
+
+message BattleInfo{
+	optional SimpleBattleInfo battleInfo = 1;
+	optional BattleDetail battleDetail = 2;
+	repeated BattleRoundInfo roundInfo = 3;
+	repeated BattleRoundDetail roundDetail = 4;
+}
+
+message CSBattleDetail{
+	required string battleId = 1;
+}
+
+message SCBattleDetail{
+	optional BattleDetail battleDetail = 1;
+}
+
+message BattleDetail {
+	repeated Army offence = 1;
+	repeated Army defence = 2;
+	repeated int64 winnerId = 3;
+	optional int32 roundNum = 4;
+	optional int32 lastRoundTime = 5;
+	optional string cityName = 6;//战场城市的名字
+	optional CityResource resource = 7;
+	optional SimpleArmyInfo offenceInfo = 8;
+	optional SimpleArmyInfo defenceInfo = 9;
+	optional string battleId = 10;
+	optional bool isOver = 11;
+}
+
+message Army{
+	optional string playerName = 1;
+	optional string cityName = 2;
+}
+
+message SimpleArmyInfo {
+	optional int32 playerCount = 1;
+	optional int32 kill = 2;
+	optional int32 lost = 3;
+	optional int32 remain = 4;
+}
+
+message CSBattleList{
+}
+
+message SCBattleList{
+	repeated SimpleBattleInfo battleInfo = 1;
+}
+
+message SimpleBattleInfo{
+	optional bool isOver = 1;
+	optional int32 cityId = 2;
+	optional int32 cityLevel = 3;
+	optional string cityName = 4;
+	optional string playerName = 5;//城主名字
+	optional CityResource resource = 6;
+	optional int32 lastRoundTime = 7;
+	optional BattleType type = 8;
+	repeated int64 winnerId = 9;
+	required string battleId = 10;//索引
+}
+enum BattleResult {
+	OFFENCE_WIN = 1;
+	DEFENCE_WIN = 2;
+	EVEN = 3;
+}
+enum BattleType {
+	LAND_WAR = 1;//陆战
+	AIR_WAR = 2;//空战
+	SPY = 3;//间谍
+}
+
+message CSRoundList{
+	required string battleId = 1;
+}
+
+message SCRoundList{
+	repeated BattleRoundInfo roundInfo = 1;
+	required string battleId = 2;
+}
+
+message CSRoundDetail{
+	required string battleId = 1;
+	required int32 roundNum = 2;
+}
+
+message SCRoundDetail{
+	optional BattleRoundDetail roundDetail = 1;
+}
+
+
+message BattleRoundInfo{
+	optional int64 playerId = 1;
+	optional int32 cityId = 2;
+	optional int32 roundNum = 3;
+	repeated RoundTroopInfo roundTroopInfo = 4;
+}
+message RoundTroopInfo{
+	optional int32 troopId = 1;
+	optional int32 count = 2;
+	optional int32 lost = 3;
+}
+message BattleRoundDetail{
+	optional int32 battleId = 1;
+	optional int32 roundNum = 2;
+	optional double morale = 3;
+	repeated RoundTroopDetail roundTroopDetail = 4;
+}
+message RoundTroopDetail{
+	optional int32 troopId = 1;
+	required BattleFieldType fieldType = 2;
+	optional int32 count = 3;
+	optional int32 lost = 4;
+	optional double amountRemain = 5;
+}
+message CSMilitaryAction{//向服务器 发送----军事行动  
+	required int32 targetCityId = 1;
+	optional int32 shipNum =2;
+	required MilitaryActionType actionType = 3;
+	optional TroopInfo troopInfo = 4;
+	required int32 sourceCityId = 5;
+}
+
+enum MilitaryActionType{//军事 行动 的  类型
+	GUARD_CITY = 1;//保卫城镇
+	GUARD_PIER = 2;//保卫港口
+	PLUNDER_CITY = 3;//劫掠
+	INVADE_PIER = 4;//占领港口
+	INVADE_CITY = 5;//占领城镇
+	SPY_CITY = 6;//派遣间谍
+	SEND_LAND_TROOP = 7;//部署陆军
+	SEND_FLY_TROOP = 8;//部署空军
+}
+
+message SCMilitaryAction{
+}
+
+message CSMilitaryInfo{//打开 军事 面板
+	
+}
+
+message SCMilitaryInfo{//打开 军事 面板//收到 服务器呢 反馈
+	repeated TransportTask tasks = 1;
+}
+
+message MarketOrderInfo{
+	required MarketType marketType = 1;//交易类型
+	optional int32 count = 2;//数量
+	optional int32 price = 3;//单价
+	required ResourceType resourceType = 4;//资源类型
+}
+
+message CityOrderInfo{
+	required int32 cityId = 1;
+	optional string cityName = 2;
+	repeated MarketOrderInfo marketOrderInfo = 3;
+	optional int32 distance = 4;//距离
+}
+message CSDeal{
+	required int32 cityId = 1;
+	required MarketOrderInfo marketOrderInfo = 2;
+	required int32 currentCityId = 3;
+}
+
+message SCDeal{
+
+}
+
+message CSQueryMarketOrder{
+	required int32 cityId = 1;
+}
+message SCQueryMarketOrder{
+	repeated CityOrderInfo cityOrderInfo = 2;
+}
+message CSCreateCityOrderInfo{
+	required CityOrderInfo cityOrderInfo = 1;
+}
+
+message SCCreateCityOrderInfo{
+
+}
+
+message CSShowMyOrderInfo{
+	required int32 cityId = 1;
+}
+
+message SCShowMyOrderInfo{
+	optional CityOrderInfo cityOrderInfo = 1;
+}
+
+message CSGmCommand{
+	required string command = 1;
+	optional int32 cityId = 2;
+}
+
+message SCGmCommand{
+
+}
+
+message CSBuyPerson{
+	required int32 cityId = 1;
+}
+
+message SCBuyPerson{
+	required int32 cityId = 1;
+	required int32 person = 2;
+}
+
+message SCUpdateTroopInfo{
+	required int32 cityId = 1;
+	optional TroopInfo troopInfo = 2;//覆盖更新
+}
+
+message CSOverTransportTask{
+	required int64 taskId = 1;
+}
+message SCOverTransportTask{
+	required int64 taskId = 1;
+}
+message CSCancelTransportTask{
+	optional int64 taskId = 1;
+}
+
+message SCCancelTransportTask{
+	optional int64 taskId = 1;
+}
+
+message CSStartTransportTask{
+	required TransportTask task = 1;
+}
+
+message SCStartTransportTask{
+	optional TransportTask task = 1;
+}
+
+message CSShowBuyShip{
+	
+}
+enum ShipType{
+	GOLD_SHIP = 1;//金币运输船
+	DIAMOND_SHIP = 2;//钻石运输船
+	FRIEND_SHIP = 3;//好友
+	SYSTEM_SHIP = 4;//政府体制
+	LOGIN_SHIP = 5;//登陆奖励
+}
+
+message SCShowBuyShip{
+	optional int32 goldShipCount = 1;//金币购买的运输船数量
+	optional int32 diamondShipCount = 2;//钻石购买的运输船数量
+	optional int32 friendShipCount = 3;//好友奖励的运输船数量
+	optional int32 systemShipCount = 4;//政府体制的运输船数量
+	optional int32 loginShipCount = 5;//登陆奖励的运输船数量
+	optional int32 goldPrice = 6;//购买下一个运输船的金币价格
+	optional int32 diamondPrice = 7;//购买下一个钻石运输船的价格
+}
+
+message CSChangeSystem{
+	required int32 systemId =1;
+}
+message SCChangeSystem{
+	required int32 systemId = 1;
+	required int32 overTime = 2;//剩余的时间秒数
+}
+
+message CSSetCapital{
+	required int32 cityId = 1;//要把哪个城市设置为首都
+}
+message SCSetCapital{
+	optional int32 cityId = 1;//如果设置成功了的话，返回首都的城市id
+}
+
+message CSDisbandTroop{
+	required int64 id = 1;//实例id
+	required int32 count = 2;//数量
+}
+
+message SCDisbandTroop{
+	required int64 id = 1;
+	required int32 count = 2;
+}
+
+message CSCancelProductionTroop{
+	required int32 cityId = 1;
+	required int32 position = 2;//建筑的坐标点
+}
+message SCCancelProductionTroop{
+	//在公共消息里更新 资源数量
+}
+
+message CSCreateCity{
+	optional int32 cityId = 1;//从哪个城市出发
+	optional int32 landId = 2;//目标岛屿
+	optional int32 position = 3;//目标岛屿上的位置
+	optional CityResource cityResource = 4;//携带的资源数量
+}
+
+message SCCreateCity{
+	optional SimpleCityInfo city = 1;
+}
+message CSMoveCity{
+	required int32 cityId = 1;
+	required int32 landId = 2;
+	required int32 position = 3;
+}
+
+message SCMoveCity{
+	optional SimpleCityInfo city = 1;
+}
+
+message CSChangeCityName{
+	required int32 cityId = 1;
+	required string cityName = 2;
+}
+
+message SCChangeCityName{
+	required int32 cityId = 1;
+	required string cityName = 2;
+}
+
+message CSShowTechProgress{
+
+}
+message SCShowTechProgress{
+	required int32 totalTeacher = 1;//总共的科学家数量
+	required int32 totalTechPoint = 2;//研究点的数量
+	required double techPointRate = 3;//研究点的每小时产量
+	repeated int32 progress = 5;//每个类型的科技研究进度
+	repeated int32 maxLevel = 6;//最高等级
+}
+
+message CSShowTechBuild{
+	required int32 cityId = 1;
+}
+message SCShowTechBuild{
+	required int32 cityTeacher = 1;//这个城市里的科学家数量
+	//required int32 totalTeacher = 2;//总共的科学家数量
+	//required int32 totalTechPoint = 3;//研究点的数量
+	required double techPointRate = 4;//本城市的研究点的每小时产量
+	required int32 person = 5;//本城市的当前的空闲人口
+	required int32 goldRate = 6;//本城市的当前的金币每小时产量
+}
+
+message CSStudyTech{
+	required int32 techId = 1;//要学习的科技id
+}
+
+message SCStudyTech{
+	required int32 techId = 1;//学会了什么技能
+	required int32 techPoint = 2;//剩余的科技点数
+}
+
+message CSSetTecher{
+	optional int32 cityId = 1;
+	optional int32 techer = 2;
+}
+
+message SCSetTecher{
+	optional int32 cityId = 1;
+	optional int32 techer = 2;
+}
+
+message CSSetPubLevel{
+	required int32 cityId = 1;
+	required int32 position = 2;
+	required int32 level = 3;//消耗的等级
+}
+
+message SCSetPubLevel{
+	required int32 cityId = 1;
+	required int32 position = 2;
+	required int32 level = 3;//消耗的等级
+}
+message Worker{
+	required int32 type = 1;//1是伐木工，2是特殊资源矿，3是科学家，4是祭祀
+	required int32 count = 2;//数量
+}
+message CSSetWorker{
+	required int32 cityId = 1;
+	repeated Worker workers = 2;
+}
+message SCSetWorker{
+
+}
+
+message CSCheckBuild{
+	required int32 cityId = 1;
+	required int32 position = 2;
+}
+
+message SCCheckBuild{
+	optional Building building = 1;
+}
+
+message CSSpeedyBuilding{
+	required int32 cityId = 1;
+	required int32 position = 2;
+	optional int32 itemId = 3;//预留的消耗道具加速
+	optional int32 type = 4;//1为元宝加速，直接完成。2为消耗道具，加速道具所定义的时间。3为剩余时间小于5分钟免费加速。
+}
+
+message SCSpeedyBuilding{
+	optional Building building = 1;
+}
+
+
+message CSCreateBuilding{
+	required int32 cityId = 1;
+	required int32 position = 2;
+	required int32 buildId = 3;
+	optional bool isOver = 4[default = false];//true为立即建造，false为正常建造
+}
+message SCCreateBuilding{
+	optional Building building = 1;
+}
+
+message CSLandDonation{
+	required int32 cityId = 1;
+	required int32 type = 2;//1为木头长，2为特殊资源矿
+	required int32 count = 3;//资源数量
+}
+
+message SCLandDonation{
+	required int32 landCount = 1;//当前岛屿的捐献量
+	required int32 level = 2;//当前资源矿的等级
+	required int32 cityId = 3;//当前是哪个城市
+	required int32 cityCount = 4;//当前城市的捐献量
+	required int32 type = 5;//发送请求带过来的type
+}
+
+//攻击、防御会有科技的加成，以服务器发的为准，其他的取配置文件
+message Troop{
+	optional int64 id = 1;//部队的服务器实例id，部队解雇、交易的时候需要用
+	optional int32 troopResId = 2;//部队配置文件的id
+	optional int32 count = 3;//部队数量
+	optional int32 attack = 4;//近战攻击
+	optional int32 attack2 = 5;//远程攻击
+	optional int32 defense = 6;//防御力
+}
+message Troops{
+	repeated Troop troops = 1;
+}
+message CSProductionTroop{
+	required Troops troops = 1;
+	required int32 cityId = 2;
+	required int32 position = 3;//建筑的坐标点
+}
+
+message SCProductionTroop{
+	optional Troops troops = 1;//本次所生产的部队
+	optional int32 needTime = 2;
+}
+
+message CSBuyShip{
+	required ShipType shipType = 1;
+}
+
+message SCBuyShip{
+	optional ShipType shipType = 1;
+	optional int32 shipCount = 2;//运输船的数量
+	optional int32 price = 3;//新的价格，可能是元宝，可能是金币
+}
+
+message LandDonation{
+	required int64 playerId = 1;
+	required string playerName = 2;
+	required int32 cityId = 3;
+	required string cityName = 4;
+	required int32 cityLevel = 5;
+	required int32 worker = 6;//工人数量
+	required int32 count = 7;//已捐献的数量
+}
+//MSG_ID_SHOW_LAND_RESOURCE
+message CSShowLandResource{
+	required int32 cityId = 1;
+	required int32 type = 2;//1是木头，2是特产
+	required int32 landId = 3;//岛屿id
+}
+
+//各种的增益、减益效果
+message AddBuffer{
+	optional int32 govSystem = 1;//政府体制
+	optional int32 tempWorker = 2;//临时工
+	optional int32 payment = 3;//付费奖励
+	optional int32 god = 4;//信仰奖励
+	optional int32 building = 5;//建筑加成
+	optional int32 corruption = 6;//腐败加成
+}
+message SCShowLandResource{
+	optional int32 person = 1;//空闲人口
+	optional int32 worker = 2;//工人数量
+	optional int32 workRate = 3;//资源的每小时产量
+	optional int32 cityGoldRate = 4;//城市的金币产量
+	repeated LandDonation landDonations = 5;//岛屿上每个人的捐献数据
+	optional int32 level = 6;//资源矿当前的等级
+	optional int32 exp = 7;//资源矿当前的经验
+	optional int32 buildTime = 8;//如果资源矿在升级的话，这里显示升级时间
+	optional AddBuffer buffer = 9;//各种的增益、减益效果
+}
+enum CityStatus{
+	CITY_NORMAL = 1;//正常状态
+	CITY_Building = 2;//建设中
+	CITY_WARING = 3;//处于战争中
+	
+}
+message SimpleCityInfo{
+	required int64 playerId = 1;//城市所有者的id
+	required string cityName = 2;//城市的名字
+	required int32 cityId = 3;//城市的id
+	required int32 postion = 4;//位置 1-17
+	required int32 level = 5;//城市的等级
+	required int32 landId = 6;//岛屿id
+	optional CityStatus status = 7;//城市的状态
+
+	optional string playerName = 8;
+	optional int32 playerPoint = 9;
+	optional string partyName = 10;
+	optional int32 partyId = 11;
+}
+
+message Land{
+	repeated SimpleCityInfo cityInfos = 1;//简单城市信息列表
+	required int32 landId = 2;
+	optional int32 woodLevel = 3;//木材厂的等级
+	optional int32 woodTime = 4;//木材厂的建造完成时间
+	optional int32 resourceLevel = 5;//特殊资源点等级
+	optional int32 resourceTime = 6;//特殊资源的建造完成时间
+}
+
+message CSShowCity{
+	required int32 cityId = 2;
+}
+
+message SCShowCity{
+	repeated Building buildings = 1;
+}
+
+message CSShowLand{
+	required int32 landId = 1;
+}
+
+message SCShowLand{
+	required Land land = 1;
+}
+
+message LandData{
+	required int32 landId = 1;
+	required int32 count = 2;//岛屿上的城市数量
+	required int32 status = 3;//岛屿的状态，预留
+}
+
+message CSShowWorld{
+	repeated int32 landId = 1;
+}
+message SCShowWorld{
+	repeated LandData lands = 1;
+}
+
+message CSShowBuild{
+	required int32 cityId = 1;
+	required int32 position = 3;
+}
+
+//市政厅
+message MainBuild{
+	required int32 totalPerson = 1;//当前总人口
+	required int32 landArmy = 2;//陆地军队上限
+	required int32 flyArmy = 3;//空军军队上限
+	required int32 actionPoint = 4;//行动点
+	required double personRate = 5;//人口增长率
+	required int32 cityGoldRate = 6;//城市的金币增长率
+	required int32 corruption = 7;//腐败率
+	required int32 freePerson = 8;//空闲的人口
+	required int32 woodWorker = 9;//伐木工人
+	required int32 resourceWorker = 10;//资源矿的工人
+	required int32 techer = 11;//科学家
+	required int32 magicer = 12;//祭祀
+	required int32 freePersonGoldRate = 13;//金币生存率
+	required int32 woodRate = 14;//木头生存率
+	required int32 resourceRate = 15;//特殊资源生产率
+	required int32 techPointRate = 16;//研究点的生产率
+	required int32 magicPoint = 17;//祭祀的点数
+	required int32 basePO = 18;//PO表示民意
+	optional int32 sysPO = 19;//政府体制增加的民意
+	optional int32 techPO = 20;//科技增加的民意
+	optional int32 capitalPO = 21;//首都增加的民意
+	optional int32 foodBuildPO = 22;//酒馆等级所增加的民意
+	optional int32 foodPO = 23;//消耗食物所增加的民意
+	optional int32 museumBuildPO = 24;//博物馆等级增加的民意
+	optional int32 museumPO = 25;//文物增加的民意
+	optional ResourceType resourceType = 26[default = FOOD];//本城市的特产资源类型
+}
+
+message PubBuild{
+	required int32 currentPO = 1;//当前的民意值
+	required int32 currentLevel = 2;//当前的消耗等级
+}
+message ProductionTroop{
+	optional Troops troops = 1;
+	optional int32 overTime = 2;//剩余的时间
+	optional int32 freePerson = 3;//空闲的人口
+	
+}
+
+message Palace{
+	required int32 systemId = 1;
+	optional int32 targetSystemId = 2;
+	optional int32 overTime = 3;//如果是在革命中，提示剩多少时间
+	optional int32 needGold = 4;//如果革命的话，需要的金币
+	optional int32 needTime = 5;//如果革命的话，需要的时间	
+}
+
+enum TransportStatus{
+	LOADING = 1;//装载中
+	WAITING = 2;//等待中
+	BACKING = 3;//返回中
+	TRANSIT = 4;//运输中
+	PK = 5;//战斗
+	PLUNDER = 6;//掠夺
+	INVADE = 7;//攻击
+	GUARD = 8;//支援
+}
+
+message TransportTask{
+	optional int64 sourcePlayerId = 1;//出发玩家 id
+	optional int64 targetPlayerId = 2;//目标玩家 id 
+	optional string sourcePlayerName = 3;//出发  玩家 名称
+	optional string targetPlayerName = 4;//目标  玩家 名称
+	optional int32 sourceCityId = 5;//出发城市
+	optional int32 targetCityId = 6;//目标城市id
+	optional string sourceCityName = 7;//出发城市名称
+	optional string targetCityName = 8;//目标城市名称
+
+	optional int32 sourceCityLevel = 9;//出发玩家 城市等级
+	optional int32 targetCityLevel = 10;//目标玩家 城市等级
+	
+	optional CityResource resource = 11;//物资
+	repeated Troop landTroops = 12;//陆地部队
+	repeated Troop shipTroops = 13;//空军部队
+
+	required GameActionType type = 14[default =PRODUCTION_LAND];//动作类型//状态图标
+	optional int32 shipCount = 15;//船只 数量
+	optional TransportStatus status = 16;//运输的状态
+
+	optional int32 createTime = 17;//创建的时间
+	optional int32 loadingTime = 18;//装载需要的时间
+	optional int32 loadingStartTime = 19;//开始装载的时间
+	optional int32 shipoutTime = 20;//运输船驶出港口的时间
+	optional int32 overTime = 21;//到达的时间
+
+	optional int64 taskId = 22;//任务的id
+	optional MarketOrderInfo order = 23;//交易信息
+}
+//码头
+message Pier{
+	repeated TransportTask tasks = 1;//港口里的运输船信息
+}
+
+//根据不同的建筑返回不同的对象，用来显示面板
+message SCShowBuild{
+	optional MainBuild mainBuild = 1;//主城
+	optional PubBuild pubBuild = 2;//酒馆
+	optional ProductionTroop productionTroop = 3;//正在生产中的部队信息
+	optional Palace palace = 4;//王宫
+	optional Pier pier = 5;//码头
+	optional TroopInfo troopInfo = 6;//城市里的部队信息
+}
+
+message CSBuildLevelUp{
+	required int32 cityId = 1;
+	required int32 position = 2;
+	optional bool isOver = 3[default=false];//true为立即升级完成
+}
+
+message SCBuildLevelUp{
+	required int32 time = 1;//建造完成的时间点
+}
+
+message CSNewPlayerProgress{
+	repeated int32 ids = 1;//要添加到完成列表里的id集合
+	optional int32 addDiamond = 2;//当前这些完成的id集合一共加的钻石数
+}
+message SCNewPlayerProgress{
+	optional int32 diamond = 1;//当前钻石数
+}
+message CSBindAccount{
+	required PlatformType platformType = 1;
+	optional string account = 2;
+}
+message SCBindAccount{
+	required int32 status =1;//1是绑定成功，2为已经绑定，3该帐号下有本游戏的数据，4为新注册的角色
+}
+
+message CSPayment{
+	required string orderId = 1;
+	required string productId = 2;
+	optional bytes receipt = 3;
+	optional double baseGold = 4;
+	optional double baseRelics = 5;
+}
+
+message SCPayment{
+	required string orderId = 1;
+	required string productId = 2;
+	required int32  status = 3;//1为正常，其他为不正常
+	required int32 diamond = 4;//当前钻石数量
+	optional double gold = 5;//当前金币数量
+	optional double relics = 6;//当前圣物数量
+	repeated int32 weaponIds = 7;//增加多少heroid的武器
+}
+
+message CSCreatePlayer{
+	required string playerName = 1;
+	optional string deviceType = 2;
+	optional PlatformType platformType = 3[default = IOS];
+	optional string platformUid = 4;
+}
+
+message SCCreatePlayer{
+	optional Player player = 1;
+	optional City city = 2;
+}
+
+
+message ServerConfigRes{
+	required string version = 1;
+	 
+}
+
+message SCUpdatePlayerInfo{
+	optional int32 gold = 1;
+	optional int32 diamond = 2;
+}
+message CityResource{
+	optional int32 cityId = 1;
+	optional int32 wood = 2;
+	optional int32 food = 3;
+	optional int32 crystal = 4;
+	optional int32 metal = 5;
+	optional int32 stone = 6;
+	optional int32 person = 7;
+}
+message SCUpdateResource{
+	optional CityResource cityResource = 1;
+}
+
+message SCCommonsMessage{
+	
+}
+message SCGameNotice{
+	repeated string notices = 1;
+}
+
+//MSG_ID_CHECK_VERSION
+message CSCheckVersion{
+	required string version = 1; 
+	required PlatformType platformType = 2;
+}
+message SCCheckVersion{
+	optional VersionStatus versionStatus = 1[default = NORMAL];
+	optional string clientUrl = 2;//如果需要更新，client的下载地址
+}
+
+//MSG_ID_LOGIN
+message CSLogin{
+	required PlatformType platformType = 2;
+	optional string deviceType = 4;//设备型号
+	optional string platformUid = 5;//平台的uid
+}
+message SCLogin{
+	optional Player player = 1;
+	optional bool isNewPlayer = 2;
+	optional int32 serverTime = 3;
+	optional VersionStatus versionStatus = 4[default = NORMAL];
+	repeated City city = 5;
+	optional int32 freeShipCount = 6;//可用运输船数量
+	optional int32 totalShipCount = 7;//总共的运输船数量
+	optional int32 totalRankScore = 8;//玩家排行榜总分项得分
+	repeated int32 techProgress = 9;//科技列表的进度值
+}
+message Building{
+	required int32 position = 1;
+	required int32 level = 2;
+	optional int32 buildId = 3;
+	optional int32 buildTime = 4;
+	optional int32 productionTime = 5;
+}
+
+message TroopInfo{
+	repeated Troop landTroop = 1;
+	repeated Troop flyTroop = 2;
+}
+
+message City{
+	required int32 landId = 1;//岛屿id
+	required int32 cityId = 2;//城市id
+	optional int32 position = 3;//位置
+	optional int64 playerId = 4;//玩家id
+	optional int32 food = 5;//食物
+	optional int32 stone = 6;//石头
+	optional int32 crystal = 7;//水晶
+	optional int32 metal = 8;//金属
+	optional int32 wood = 9;//木头
+	optional int32 actionPoint = 10;//行动点
+	optional int32 level = 12;//等级
+	optional bool isCapital = 13;//	是首都 
+	repeated Building buildings = 14;
+	optional string cityName = 15;
+	optional int32 freePersion = 16;//城市的空闲人口
+	optional TroopInfo troopInfo = 17;//城市里的部队信息
+}
+
+message Player{
+	optional int64 playerId = 1;
+	optional string playerName = 2;
+	optional double gold = 3;//金币
+	optional int32 level = 4;//等级
+	optional string icon = 5;//头像
+	optional int32 status = 6;//状态
+	optional int32 vip = 7;
+	optional int32 vipTime = 8;
+	optional string pwd = 9;//用于登录亲家的聊天
+	optional string worldChatKey = 10;//世界聊天频道的key
+	optional int32 diamond = 13;//钻石
+	repeated string productIds = 19;//购买过的产品id
+	optional string account = 20;//苹果游戏中心账号 id
+	optional PlatformType platformType = 21[default = IOS];
+	
+}
+
+//MSG_ID_GET_PLAYER_PACKITEM
+message PackItem{
+	required int32 itemType = 1;
+	required int32 itemAmount = 2;
+	optional int32 position=3;
+}
+
+message CSGetItemPack{
+}
+
+message SCGetItemPack{
+	repeated PackItem itemList = 1;
+}
+
+//MSG_ID_GET_SHOP_SHELF
+message ShopItem{
+    required int32 itemType=1;
+	required int32 itemPrice=2;
+}
+
+message CSGetShopShelf{
+	required int32 shopType=2;
+}
+
+message SCGetShopItem{
+	repeated ShopItem itemList = 1;
+}
+
+message CSPing{
+
+}
+
+message SCPing{
+	required int32 serverTime = 1;
+}
+
+message GameActionCache{
+
+}
+
+enum RankType{
+	TOTAL_RANK = 1;//王国总分排行
+	WARFARE_RANK = 2;//王国“战争元帅”项排行
+	BEAT_RECORD_RANK = 3;//王国历史消灭敌人数量排行
+	GOLD_RANK = 4;//王国当前金币数量排行
+	SCIENCE_RANK = 5;//王国科技点数排行
+	BUILDING_RANK = 6;//王国所有建筑等级排行
+}
+
+message RankItem{
+	required string playerName = 1;
+	required int32 playerRank = 2;
+	required int32 playerSocre = 3;
+}
+
+message CSShowKingInfo{
+}
+
+message SCShowKingInfo{
+	required int32 totalScore = 1;
+	required int32 buildingScore = 2;
+	required int32 scienceScore = 3;
+	required int32 warfareScore = 4;
+	required int32 goldScore = 5;
+}
+
+message CSShowRank{
+	required RankType rankType = 1; 
+}
+
+message SCShowRank{
+	required RankType rankType = 1;
+	required int32 myRank = 2;
+	repeated RankItem rankItem = 3;
+}
+
+

@@ -1,5 +1,6 @@
 package cn.litgame.wargame.core.logic.queue.impl;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,16 +11,21 @@ import java.util.ListIterator;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang.CharSet;
+import org.apache.log4j.Logger;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import cn.litgame.wargame.core.auto.GameProtos;
 import cn.litgame.wargame.core.auto.GameGlobalProtos.GameActionType;
+import cn.litgame.wargame.core.auto.GameProtos.BattleInfo;
 import cn.litgame.wargame.core.auto.GameProtos.CityResource;
 import cn.litgame.wargame.core.auto.GameProtos.CityResource.Builder;
 import cn.litgame.wargame.core.auto.GameProtos.SimpleBattleInfo;
 import cn.litgame.wargame.core.auto.GameProtos.TransportStatus;
 import cn.litgame.wargame.core.auto.GameProtos.TransportTask;
 import cn.litgame.wargame.core.logic.BattleLogic;
+import cn.litgame.wargame.core.logic.RedisKeyInfo;
 import cn.litgame.wargame.core.logic.queue.GameActionEvent;
 import cn.litgame.wargame.core.model.Building;
 import cn.litgame.wargame.core.model.City;
@@ -32,6 +38,8 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 public class BattleRoundActionEvent extends GameActionEvent{
+	private static final Logger log = Logger.getLogger(BattleRoundActionEvent.class);
+	
 	@Resource(name = "jedisStoragePool")
 	private JedisPool jedisStoragePool;
 	
@@ -39,9 +47,6 @@ public class BattleRoundActionEvent extends GameActionEvent{
 	private BattleLogic battleLogic;
 	
 	private BattleField field;
-	
-	private final static String BATTLE_LIST_KEY = "battle_list";
-	private final static String ROUND_LIST_KEY = "battle_round_list";
 	
 	@Override
 	public void init(GameAction gameAction) throws InvalidProtocolBufferException{
@@ -62,7 +67,7 @@ public class BattleRoundActionEvent extends GameActionEvent{
 				field.nextRound();
 				BattleRound round = field.saveRound();
 				
-				this.saveBattleRound(round);
+				this.saveBattle(round);
 				this.updateGameAction(gameAction);
 			}
 			
@@ -184,36 +189,72 @@ public class BattleRoundActionEvent extends GameActionEvent{
 		gameActionLogic.updateGameAction(gameAction);
 	}
 
-	private void saveBattleRound(BattleRound round) {
+	private void saveBattle(BattleRound round) {
+		
 		try(Jedis jedis = jedisStoragePool.getResource();){
+			BattleInfo.Builder battleInfo = BattleInfo.newBuilder();
+			battleInfo.setBattleInfo(field.convertToSimpleBattleInfoBuilder());
+			battleInfo.setBattleDetail(field.convertToBattleDetailBuilder());
+			
+			
 			if(round.getSeqNo() == 1){
-				SimpleBattleInfo.Builder battle = field.convertToSimpleBattleInfoBuilder();
 				for(Army a : field.getArmysOffence()){
-					jedis.rpush(this.buildPlayerBattleKey(a), this.buildFieldKey(field));
+					jedis.rpush(this.buildPlayerBattleKey(a), field.getUUID().getBytes());
 				}
 			}
+			
+			jedis.hset(this.buildRedisKey(RedisKeyInfo.SIMPLE_BATTLE_INFO_KEY), field.getUUID().getBytes(), battleInfo.build().toByteArray());
+			
 			if(field.getResult() != BattleField.RESULT_FIGHTING){
 				String startTime = String.valueOf(field.getStartTime());
 			}
-			jedis.hset(this.buildRedisKey(ROUND_LIST_KEY), this.buildFieldKey(field), round.toByteArray());
+			
 		}
 	}
 
-	private byte[] buildPlayerBattleKey(Army a) {
+	private byte[] buildPlayerBattleKey(Army a){
 		String key = "battles_" + a.getPlayerId();
-		return key.getBytes();
+		try {
+			return key.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			log.error(e);
+			return new byte[0];
+		}
 	}
 
-	private byte[] buildFieldKey(BattleField field) {
+	private byte[] buildFieldKey(BattleField field){
 		StringBuilder sb = new StringBuilder();
 		sb.append(field.getFieldCityId());
 		sb.append(field.getStartTime());
 		sb.append(field.isLand());
-		return sb.toString().getBytes();
+		try {
+			return sb.toString().getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			log.error(e);
+			return new byte[0];
+		}
 	}
 
 	private byte[] buildRedisKey(String key){
-		return key.getBytes();
+		try {
+			return key.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			log.error(e);
+			return new byte[0];
+		}
 	}
 
+	private byte[] buildRoundKey(BattleField field){
+		StringBuilder sb = new StringBuilder();
+		sb.append(field.getFieldCityId());
+		sb.append(field.getStartTime());
+		sb.append(field.isLand());
+		sb.append(field.getCurrentRoundNum()-1);
+		try {
+			return sb.toString().getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			log.error(e);
+			return new byte[0];
+		}
+	}
 }

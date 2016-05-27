@@ -19,8 +19,10 @@ import javax.annotation.Resource;
 
 import org.apache.http.impl.io.ContentLengthOutputStream;
 import org.apache.log4j.Logger;
+import org.kriver.core.common.KeyUtil;
 
 import cn.litgame.wargame.core.auto.GameProtos;
+import cn.litgame.wargame.core.auto.GameProtos.BattleDetail;
 import cn.litgame.wargame.core.auto.GameProtos.SimpleBattleInfo;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleGround;
@@ -66,6 +68,8 @@ public class BattleField implements Serializable {
 	public final static boolean LAND = true;
 	public final static boolean FLY = false;
 	private final static Logger log = Logger.getLogger(BattleField.class);
+	
+	private final String UUID;
 	
 	private final boolean isLand;
 	private final int fieldCityId;
@@ -126,6 +130,7 @@ public class BattleField implements Serializable {
 
 	
 	public BattleField(BattleGround battleGround, boolean isLand, int fieldCityId) {
+		this.UUID = KeyUtil.UUIDKey();
 		this.fieldCityId = fieldCityId;
 		this.isLand = isLand;
 		this.startTime = System.currentTimeMillis();
@@ -178,6 +183,10 @@ public class BattleField implements Serializable {
 		this.armysDefence.addAll(defenceArmys);
 	}
 	
+	public String getUUID() {
+		return UUID;
+	}
+
 	public int getFieldCityId() {
 		return fieldCityId;
 	}
@@ -849,6 +858,7 @@ public class BattleField implements Serializable {
 	
 	public GameProtos.SimpleBattleInfo.Builder convertToSimpleBattleInfoBuilder() {
 		SimpleBattleInfo.Builder builder = SimpleBattleInfo.newBuilder();
+		builder.setBattleId(this.UUID);
 		City city = cityLogic.getCity(this.fieldCityId);
 		Player player = playerLogic.getPlayer(city.getPlayerId());
 		builder.setIsOver(this.result != RESULT_FIGHTING);		
@@ -866,11 +876,49 @@ public class BattleField implements Serializable {
 					builder.addWinnerId(a.getPlayerId());
 				}
 			}
-			long overTime = this.getStartTime() + (this.currentRoundNum - 2)*this.nextActionTime;
-			builder.setOverTime((int) (overTime/1000));
+			long overTime = this.getStartTime() + (this.currentRoundNum - 2)*BattleField.nextActionTime;
+			builder.setLastRoundTime((int) (overTime/1000));
 		}
+		
 		return builder;
 	}
+	
+	public GameProtos.BattleDetail.Builder convertToBattleDetailBuilder() {
+		BattleDetail.Builder builder = BattleDetail.newBuilder();
+		builder.setIsOver(this.result == RESULT_FIGHTING);
+		builder.setBattleId(this.UUID);
+		for(Army a : this.armysOffence){
+			GameProtos.Army.Builder ambuilder = GameProtos.Army.newBuilder();
+			City city = cityLogic.getCity(a.getCityId());
+			Player player = playerLogic.getPlayer(a.getPlayerId());
+			ambuilder.setPlayerName(player.getPlayerName());
+			ambuilder.setCityName(city.getCityName());
+			builder.addOffence(ambuilder);
+			if(this.result == RESULT_OFFENCE_VICTORY){
+				builder.addWinnerId(a.getPlayerId());
+			}
+		}
+		for(Army a : this.armysDefence){
+			GameProtos.Army.Builder ambuilder = GameProtos.Army.newBuilder();
+			City city = cityLogic.getCity(a.getCityId());
+			Player player = playerLogic.getPlayer(a.getPlayerId());
+			ambuilder.setPlayerName(player.getPlayerName());
+			ambuilder.setCityName(city.getCityName());
+			builder.addDefence(ambuilder);
+			if(this.result == RESULT_DEFENCE_VICTORY){
+				builder.addWinnerId(a.getPlayerId());
+			}
+		}
+		
+		builder.setRoundNum(this.currentRoundNum-1);
+		long overTime = this.getStartTime() + (this.currentRoundNum - 2)*BattleField.nextActionTime;
+		builder.setLastRoundTime((int) (overTime/1000));
+		builder.setCityName(cityLogic.getCity(fieldCityId).getCityName());
+		
+		return builder;
+		
+	}
+	
 	
 	@Override
 	public String toString(){

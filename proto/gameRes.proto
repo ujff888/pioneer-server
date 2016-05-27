@@ -1,0 +1,304 @@
+
+package litgame.game;
+option java_package = "cn.litgame.wargame.core.auto";
+option java_outer_classname = "GameResProtos";
+option optimize_for = SPEED;
+
+message PayInfo{
+	required int32 id	= 1;
+	required string name = 2;
+	required string producId = 3;	
+	required int32 rmb = 4;	
+	required string desc = 5;	
+	required string firstDesc	= 6;	
+	required int32 giftId = 7;	
+	required int32 fristGiftId = 8;
+}
+
+//兵种类型
+enum TroopType{
+	REMOTE = 1;//远程
+	LIGHT = 2;//侧翼
+	WEIGHT = 3;//近战
+	FLY_AIR = 4;//空战
+	FLY_FIRE = 5;//轰炸
+	FIRE = 6;//火炮
+	LOGISTICS = 7;//后勤
+	NPC = 8;//电脑
+	REMOTE_NO_AMMO = 9;//没有弹药的远程
+}
+
+//阵地类型
+enum BattleFieldType{
+	FIELD_SUPPORT = 1;//后勤
+	FIELD_FLY_FIRE = 2;//轰炸
+	FIELD_FIRE = 3;//火炮
+	FIELD_REMOTE = 4;//远程
+	FIELD_CLOSE = 5;//近战
+	FIELD_SIDE = 6;//侧翼
+	FIELD_FLY = 7;//空战
+	FIELD_BACKUP = 8;//后备队
+	FIELD_MAIN = 9;//前线阵地，近战、远程、火炮的集合体
+}
+
+enum ShopShelfType{
+	HOT = 1;//热卖
+	INCRE = 2;//增益
+	WAR_SHELF = 3;//战争
+	RESOURCES = 4;//资源
+	OTHERS = 5;//其它
+}
+
+//战场配置
+message BattleGround{
+	required int32 level = 1;//等级
+	optional int32 fly = 2;//空战
+	optional int32 flyCount = 3;
+	optional int32 flyFire = 4;//轰炸
+	optional int32 flyFireCount = 5;
+	optional int32 fire = 6;//火炮
+	optional int32 fireCount = 7;
+	optional int32 remote = 8;//远攻
+	optional int32 remoteCount = 9;
+	optional int32 weight = 10;//近战
+	optional int32 weightCount = 11;
+	optional int32 light = 12;//侧翼
+	optional int32 lightCount = 13;
+	optional int32 type = 14;//战场类型，1为陆地，2为海洋
+}
+message ResItem{
+	required int32 itemId = 1;
+	required string itemName = 2;
+	required string itemDes = 3;
+	required int32 buffId = 4;
+}
+//商店配置
+message ResShopItem{
+    required int32 id=1;
+	required int32 itemType=2;
+	required int32 itemPrice=3;
+	required ShopShelfType shelfType=4;
+}
+//兵种配置
+message ResTroop{
+	required int32 id = 1;//id
+	required string name = 2;//名字
+	required string des = 3;//描述
+	optional int32 unlockLevel = 4;//解锁等级
+	optional int32 unlockTechId = 5;//解锁依赖的科技
+	optional int32 type = 6;//兵种
+	optional TroopType troopType = 7;//阵型
+	optional int32 attack = 8;//攻击
+	optional double percent = 9;//攻击准确度
+	optional int32 attack2 = 10;//弹药供给
+	optional double percent2 = 11;//弹药供给准确度
+	optional int32 amount = 12;//弹药数量
+	optional int32 hp = 13;//血量
+	optional int32 defense = 14;//防御
+	optional int32 speed = 15;//速度
+	optional int32 space = 16;//空间
+	optional int32 wood = 17;//木头
+	optional int32 metal = 18;//金属
+	optional int32 crystal = 19;//水晶
+	optional int32 grain = 20;//粮食
+	optional int32 person = 21;//人口
+	optional int32 gold = 22;//金币
+	optional int32 weight = 23;//重量
+	optional int32 time = 24;//建造时间
+}
+//资源类型
+enum ResourceType{
+	FOOD = 1;//食物
+	METAL = 2;//金属
+	STONE = 3;//石头
+	CRYSTAL = 4;//水晶
+	WOOD = 5;//木材
+}
+//底座
+enum LandBaseType{
+	one = 1;//
+	two = 2;//
+	three = 3;//
+	four = 4;//
+	five = 5;//
+}
+
+
+//图腾
+enum Totems{
+	HFS = 1;//赫菲斯拓斯熔爐
+	HDS = 2;//哈迪斯神聖石榴園
+	DME = 3;//德墨忒爾花園
+	YDN = 4;//雅典娜神殿
+	AMS = 5;//愛瑪仕神殿
+	ARS = 6;//阿瑞斯戰神要塞
+	PSD = 7;//波賽頓神殿
+	NL = 8;//尼祿巨像
+}
+
+enum LandType{
+	air = 1;//天空
+	land = 2;//浮岛
+	activity = 3;//活动的特殊岛屿
+}
+
+message ResLand{
+	required int32 landId = 1;//岛屿的id,按照id从大到小的顺序选择玩家的出生地
+	required LandType landType = 2;//岛屿类型
+	required int32 modelId = 3;//美术资源id
+	optional ResourceType resourceType = 4;//如果是岛屿的话，岛屿的资源类型
+	optional Totems totems = 5;//岛屿上的图腾
+	optional LandBaseType landBaseType = 6;//岛屿的底座
+	optional int32 x = 7;//x坐标
+	optional int32 z = 8;//z坐标
+	optional int32 rotationY = 9;//与y轴的旋转角度
+}
+
+message ResBuildType{
+	required int32 typeId = 1;//建筑类型id
+	required string buildName = 2;//建筑名称
+	required string buildDes = 3;//建筑介绍
+	optional int32 techId = 4;//依赖的科技id
+}
+
+//建筑配置表
+message ResBuild{
+	required int32 buildId = 1;
+	required int32 level = 2;
+	optional int32 wood = 3;
+	optional int32 stone = 4;
+	optional int32 crystal = 5;
+	optional int32 metal = 6;
+	optional int32 food = 7;
+	optional int32 time = 8;
+	optional int32 arg1 = 9;
+	optional int32 arg2 = 10;
+	optional int32 arg3 = 11;
+	optional int32 arg4 = 12;
+	optional int32 arg5 = 13;
+}
+//科技配置表
+message ResTech{
+	required int32 techId = 1;
+	required string techName = 2;
+	required string techTypeName = 3;
+	required int32 index = 4;
+	repeated int32 techIds = 5;
+	required string techDes = 6;
+	required int32 techPoint = 7;
+	repeated int32 buildId = 8;
+	repeated int32 troopId = 9;
+	repeated GameBuff buffers = 10;
+	required int32 techTypeId = 11;
+	
+}
+//科技的buff表
+message ResTechBuff{
+	required int32 bufferId = 1;
+	required string bufferName = 2;
+	required int32 count = 3;
+}
+//对应的Buffer类型配置表
+message ResBuffType{
+	required int32 buffTypeId = 1;
+	required string buffName = 2;
+}
+
+message GameBuff{
+	required ResBuffType buffType = 1;
+	required int32 count = 2;
+}
+
+//政府体制表
+message ResSystem{
+	required int32 systemId = 1;
+	required string systemName = 2;
+	required string systemDes = 3;
+	optional int32 techId = 4;
+	repeated GameBuff buffers = 5;//好的效果
+	repeated GameBuff debuffers = 6;//不好的效果
+}
+//运输船的价格表
+message ResTransport{
+	required int32 count = 1;//数量
+	required int32 price = 2;//金币价格
+	required int32 diamond = 3;//钻石价格
+}
+
+//资源矿的配置表
+message ResLandResource{
+	required int32 level = 1;
+	required int32 type = 2;//1是木头矿，2是资源矿
+	required int32 needWood = 3;//升到下级需要的木头数量
+	required int32 maxWorker = 4;//当前等级允许的最大工人数量
+	required int32 time = 5;//升级需要的时间
+}
+
+message QJConfig{
+	optional string appName = 1[default = "SpaceSLG2"];
+	optional string appKey = 2[default = "fae73cbd-d52d-4856-bb6e-1adc6071559e"];
+}
+
+message GlobalConfig{
+	optional int32 basePublicOpinion = 1[default = 196];//城市的默认基础民意奖励
+	optional int32 defaultSystemId = 2[default = 4001];//默认的玩家初始政治体制
+	optional int32 noSystemId = 3[default = 4009];//变革中的话，无政府主意的id
+	optional int32 changeSystemGold = 4[default = 5000];//城市数量*本价格就是总价格
+	optional int32 changeSystemTime = 5[default = 1800];//城市数量 * 本时间就是总时间，单位是秒
+	optional int32 defaultTechPoint = 6[default = 99999999];//创建用户后，初始的科技点
+	optional int32 defaultResource = 7[default = 10000];//创建用户后，城市的初始的资源量
+	optional string defaultCityName = 8[default = "无名小镇"];//创建城市后的默认城市名字
+	optional int32 defaultCityPerson = 9[default = 5];//创建城市后的默认人口数量
+	optional int32 goldMaxTransportNum = 10[default = 180];//金币拥有运输船的最大数
+	optional int32 diamondMaxTransportNum = 11[default = 40];//钻石拥有运输船的最大数
+	optional int32 friendShipMaxCount = 12[default = 72];//邀请好友得到运输船的最大数
+	optional int32 systemShipMaxCount = 13[default = 2];//政府体制奖励得到运输船的最大数
+	optional int32 loginShipMaxCount = 14[default = 12];//登录奖励得到运输船的最大数
+	optional QJConfig qjConfig = 15;//亲家聊天室的配置文件
+	optional int32 initGold = 16[default = 9999999];//用户的初始金币
+	optional int32 initDiamond = 17[default = 9999999];//用户的初始钻石
+	optional int32 createCityGold = 18[default = 9000];//建立城市需要的金币
+	optional int32 createCityPerson = 19[default = 40];//建立城市需要的人口
+	optional int32 createCityWood = 20[default = 1250];//建立城市需要的木头
+	optional int32 moveCityDiamond = 21[default = 150];//迁移城市消耗的钻石
+	optional int32 createCityDiamond = 22[default = 150];//在特殊位置上建造城市消耗的钻石
+	optional SpecialBuildingPosition position = 23;//特殊建造点
+	optional int32 createCityMaxResource = 24[default = 2500];//建造城市的时候每种资源的最大携带量
+	optional int32 buyPersionDiamond = 25[default = 100];//购买人口的价格
+	optional int32 buildingTimeDiamond = 26[default = 1];//建造加速的时间每分钟的价格
+	optional int32 buyPersionCount = 27[default = 10];//每次购买人口的数量
+	optional int32 speedBaseTime = 28[default = 36000];//这个值除以舰船配置的移动速度等于需要的时间，单位是秒
+	optional int32 resourcePriceMin = 29[default = 3];//市场里物品的价格最小值
+	optional int32 resourcePriceMax = 30[default = 20];//市场里物品的价格最大值
+	optional int32 shippingTimeDiamond = 31[default = 1];//加速运输的时间每分钟的价格
+}
+
+message SpecialBuildingPosition{
+	optional int32 cityHall = 1[default = 0];//市政中心
+	optional int32 wall = 2[default = 1];//城墙
+	optional int32 port = 3[default = 2];//空港
+	optional int32 dock = 4[default = 3];//船坞
+	optional int32 piratesFortress = 5[default = 4];//海贼堡垒
+	optional int32 cityPayDiamond = 6[default = 16];//花钻石建城
+}
+
+message GameResource {
+	optional string version = 1[default = "1.0.0"];
+	repeated PayInfo payInfo = 2;
+	repeated ResTroop resTroop = 3;
+	repeated BattleGround battleGrounds = 4;
+	repeated ResLand resLands  = 5;
+	repeated ResBuild resBuilds = 6;
+	repeated ResBuildType resBuildType = 7;
+	repeated ResTech resTeches = 8;
+	repeated ResTechBuff resTechBuffer = 9;
+	optional GlobalConfig globalConfig = 10;
+	repeated ResLandResource resLandResource = 11;
+	repeated ResBuffType resBuffType = 12;
+	repeated ResSystem resSystems = 13;
+	repeated ResTransport resTransport = 14;
+	repeated ResShopItem resShopShelf=15;
+	repeated ResItem resItem = 16;
+}
+
+

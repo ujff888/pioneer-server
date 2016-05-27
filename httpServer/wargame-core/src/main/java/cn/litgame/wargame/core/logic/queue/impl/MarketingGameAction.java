@@ -53,7 +53,7 @@ public class MarketingGameAction extends GameActionEvent{
 			int resourceCount = order.getCount();
 			int resourcePrice = order.getPrice();
 			
-			///todo:这里得闲获取对方的订单信息，购买数量的最大值应该是对方挂单的记录，resourceCount重新赋值
+			//这里获取对方的订单信息，购买数量的最大值应该是对方挂单的记录，resourceCount重新赋值
 			CityOrderInfo latestCityOrder = marketLogic.getOrderInfo(targetCity.getLandId(), targetCity.getCityId());
 			CityOrderInfo.Builder newCityOrder = CityOrderInfo.newBuilder();
 			newCityOrder.setCityId(latestCityOrder.getCityId());

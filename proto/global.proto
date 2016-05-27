@@ -1,0 +1,160 @@
+package litgame.game;
+
+option java_package = "cn.litgame.wargame.core.auto";
+option java_outer_classname = "GameGlobalProtos";
+
+enum PlatformType{
+	IOS = 1;
+	UC = 2;
+	XIAOMI = 3;
+	A360 = 4;
+	BAIDU = 5;
+}
+
+enum BufferId{
+	Public = 1;
+}
+
+enum VersionStatus{
+	NORMAL = 1;//正常登录
+	STOP  = 2;//服务器拒绝登录
+	UPDATE = 3;//需要更新配置文件后进入游戏
+}
+enum TroopId{
+	ship = 2017;//运输船
+}
+
+enum MarketType{
+	MARKET_BUY = 1;//买
+	MARKET_SELL = 2;//卖
+	MARKET_FRIEND = 3;//贸易伙伴
+}
+
+enum GameActionType{
+	PRODUCTION_LAND = 1;//生产陆军
+	PRODUCTION_FLY = 2;//生产空军
+	MARKET = 3;//市场
+	BATTLE = 4;//战争
+	TRANSPORT = 5;//运输
+	CREATE_CITY = 6;//创建城市
+	NEXT_STATE_ACTION = 7;//切换到下一个状态，好多的定时任务都需要状态切换，一个定时任务触发另一个定时任务
+	BATTLE_ROUND = 8;//战斗中每回合结算
+}
+
+//标识属于哪个模块，1000以内的id留给ui线程间的消息id
+enum MessageType
+{
+	MSG_ID_LOGIN = 1000;//登陆，以及版本检查
+	MSG_ID_CHECK_VERSION = 1001;//检查版本号
+	MSG_ID_PING = 1002;//ping
+	MSG_ID_BIND_ACCOUNT = 1003;//bind account
+	MSG_ID_CHECK_GAMECENTER = 1004;//check ios game center
+	MSG_ID_PAYMENT = 1005;// 支付
+	MSG_ID_FUNCTION_SWITCH = 1006;//功能显示开关
+	MSG_ID_CREATE_PLAYER = 1007;//创建角色
+	MSG_ID_NEW_PLAYER_PROGRESS = 1008;//新手指导进度
+	MSG_ID_BUILD_LEVEL_UP = 1009;//建筑升级
+	MSG_ID_BUILD_SHOW = 1010;//打开建筑面板
+	MSG_ID_STUDY_TECH = 1011;//学习科技
+	MSG_ID_LAND_DONATION = 1012;//岛屿捐献
+	MSG_ID_PRODUCTION_TROOP = 1013;//生产部队
+	MSG_ID_BUY_SHIP = 1014;//购买运输船
+	MSG_ID_SHOW_CITY = 1015;//显示城市
+	MSG_ID_SHOW_LAND = 1016;//显示岛屿
+	MSG_ID_SHOW_WORLD = 1017;//显示世界
+	MSG_ID_CREATE_BUILDING = 1018;//建造一个建筑
+	MSG_ID_SHOW_LAND_RESOURCE = 1019;//点击岛屿的资源矿
+	MSG_ID_SPEEDY_BUILDING = 1020;//加速建造
+	MSG_ID_CHECK_BUILD = 1021;//检查建筑状态
+	MSG_ID_SET_WORKER = 1022;//设置资源矿的工人
+	MSG_ID_SET_PUB_LEVEL = 1023;//设置酒馆、饭店的消耗等级
+	MSG_ID_SET_TECHER = 1024;//设置科学家数量
+	MSG_ID_SHOW_TECH_BUILD = 1025;//点击研究院，显示的面板
+	MSG_ID_UPDATE_RESOURCE = 1026;//更新资源
+	MSG_ID_UPDATE_PLAYER_INFO = 1027;//更新角色的全局信息
+	MSG_ID_SHOW_TECH_PROGRESS = 1028;//显示科技的进度
+	MSG_ID_CHANGE_CITY_NAME = 1029;//更改城市名字
+
+	MSG_ID_CREATE_CITY = 1031;//创建分城
+	MSG_ID_MOVE_CITY = 1032;//迁城
+	MSG_ID_CANCEL_PRODUCTION_TROOP = 1033;//取消生产部队
+	MSG_ID_DISBAND_TROOP = 1034;//解散部队
+	MSG_ID_SET_CAPITAL = 1035;//设置为首都
+	MSG_ID_CHANGE_SYSTEM = 1036;//革命
+	MSG_ID_GET_PLAYER_PACKITEM=1037;//背包数据
+	MSG_ID_GET_SHOP_SHELF=1038;//商店
+	MSG_ID_SHOW_BUY_SHIP = 1039;//打开购买运输船的界面
+	MSG_ID_SHOW_KING_INFO = 1040;//显示国王信息
+	MSG_ID_SHOW_RANK = 1041;//显示排行信息
+	MSG_ID_CANCEL_TRANSPORT_TASK = 1042;//取消运输船任务
+	MSG_ID_START_TRANSPORT_TASK = 1043;//开始运输船任务
+	MSG_ID_OVER_TRANSPORT_TASK = 1044;//立即完成运输船任务
+	MSG_ID_BUY_PERSON = 1045;//购买人口
+	MSG_ID_QUERY_MARKET_ORDER = 1046;//查询市场订单
+	MSG_ID_CREATE_CITY_ORDER = 1047;//创建订单
+	MSG_ID_SHOW_MY_ORDER = 1048;//查询我的订单
+	MSG_ID_GM_COMMAND = 1049;//gm模式命令
+	MSG_ID_DEAL = 1050;//交易
+	MSG_ID_MILITARY_INFO = 1051;//军事顾问
+	MSG_ID_MILITARY_ACTION = 1052;//军事行动
+	MSG_ID_BATTLE_LIST = 1053;//战斗列表
+	MSG_ID_ROUND_LIST = 1054;//回合列表
+	MSG_ID_ROUND_DETAIL = 1055;//回合详情
+}
+
+//错误码
+enum MessageCode{
+	OK = 1;
+	ERR = 2;
+	NOT_FOUND_PLAYER = 3;//没有这个玩家
+	SESSION_EXPIRE = 4;//会话过期
+	NOT_ENOUGH_RESOURCE = 5;//没有足够的资源
+	NOT_ENOUGH_TECH_POINT = 6;//没有足够的科技点
+	NOT_ENOUGH_LEVEL = 7;//等级不够
+	NOT_FOUND_BUILDING = 8;//没有找到建筑
+	HAD_BUILDING_POSITION = 9;//该建造点已经有建筑了
+	NOT_ENOUGH_PERSON = 10;//没有足够的人口
+	HAD_LIMIT_PERSON = 11;//超出人口上限
+	NOT_NEED_SPEEDY = 12;//不需要加速，已完成
+	HAD_MAX_LEVEL = 13;//已经达到最大等级
+	DATA_EXPIRE = 14;//客户端存储的playerId已过期，需要删除，重新创建角色。因为服务器端已删除了这个用户的数据
+	NOT_FOUND_LAND = 15;//没有找到这个岛屿
+	NOT_FOUND_CITY = 16;//没有找到这个城市
+	Resource_IS_Building = 17;//资源矿升级中，不可以捐献
+	Resource_Donation_Count_ERR = 18;//捐献数量溢出了，重新请求本页面
+	NOT_FOUND_TECH = 19;//没有找到科学院
+	HAD_LIMIT_TECHER = 20;//超过了科学家的上限
+	HAD_STUDY_TECH = 22;//已经学习了该科技
+	NOT_FOUND_TECH_ID = 23;//没有找到这个科技
+	CAN_NOT_STUDY_TEACH = 24;//不能学习本科技
+	INVALID_NAME = 25;//非法的名字
+	HAD_LIMIT_BUILD = 26;//该建筑已经达到了最大数量，不能再建造了
+	NOT_FOUND_TROOP_RES = 27;//没有找到兵种的配置信息
+	HAD_LIMIT_TROOP = 28;//超过了军队上限
+	HAD_PRODUCTION_TROOP = 29;//正在生产部队，无法增加新的生产队列
+	NOT_ENOUGH_KING_BUILD_LEVEL = 30;//没有足够的王宫等级
+	NOT_ENOUGH_TRANSPORTATION = 31;//没有足够的运输船
+	NOT_ENOUGH_BUILDING_LEVEL = 32;//建筑等级不够
+	NOT_ENOUGH_TECH = 33;//科技未解锁
+	NOT_FOUND_TROOP = 34;//没有找到部队信息
+	HAD_CHANGE_SYSTEM = 35;//已经在革命中
+	CAN_NOT_CHANGE_SYSTEM = 36;//条件不满足，不能变更为目标政体
+	NOT_ENOUGH_GOLD = 37;//没有足够的金币
+	NOT_ENOUGH_DIAMOND = 38;//没有足够的钻石
+	HAD_LIMIT_COUNT = 39;//已经达到了最大数量限制
+	NOT_ENOUGH_KING_BUILD = 40;//没有王宫，或者王宫等级不够
+	NOT_FOUND_WHARF = 41;//没有码头
+	HAD_CITY_POSITION = 42;//这个位置已经有城市了
+	CITY_IS_BUILDING = 43;//城市还在建造中
+	NOT_ENOUGH_WOOD = 44;//没有足够的木头
+	NOT_ENOUGH_STONE = 45;//没有足够的石头
+	NOT_ENOUGH_CRYSTAL = 46;//没有足够的水晶
+	NOT_ENOUGH_METAL = 47;//没有足够的金属
+	NOT_ENOUGH_FOOD = 48;//没有足够的粮食
+	ONLY_OPER_SELF_DATA = 49;//只能操作自己的数据
+	NOT_FOUND_GAME_ACTION = 50;//没有找到这个运输任务
+	HAD_LIMIT_MARKET_COUNT = 51;//超过了市场的存储容量
+	NOT_FOUND_MARKET = 52;//没有找到市场
+	HAD_LIMIT_PRICE = 53;//超过了市场的价格区间
+	NOT_ENOUGH_TROOP = 54;//军队不够
+}

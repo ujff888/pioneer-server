@@ -79,6 +79,19 @@ public interface RedisKeyInfo {
 	 */
 	public static final String CURRENT_VERSION  = " currentVersion";
 
-
+	/**
+	 * 战斗简略信息
+	 */
+	public static final String SIMPLE_BATTLE_INFO_KEY = "simpleBattleInfo";
 	
+	/**
+	 * 简略战报
+	 */
+	public static final String SIMPLE_BATTLE_ROUND_KEY = "simpleBattleRound";
+	
+	/**
+	 * 详细战报
+	 */
+	
+	public static final String BATTLE_ROUND_DETAIL_KEY = "battleRoundDetail";
 }
