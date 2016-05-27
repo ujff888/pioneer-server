@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.PlayerMapper">
+
+	<resultMap id="playerMap" type="cn.litgame.wargame.core.model.Player">
+		<id property="playerId" column="playerId" />
+		<result property="deviceType" column="deviceType" />
+		<result property="playerName" column="playerName" />
+		<result property="icon" column="icon"/>
+		<result property="gold" column="gold" />
+		<result property="diamond" column="diamond" />
+		<result property="level" column="level" />
+		<result property="bindAccount" column="bindAccount" />
+		<result property="platformUid" column="platformUid" />
+		<result property="platformType" column="platformType" />
+		<result property="status" column="status" />
+		<result property="createTime" column="createTime" />
+		<result property="lastLoginTime" column="lastLoginTime" />
+		<result property="vip" column = "vip" />
+		<result property="vipTime" column ="vipTime"/>	
+		<result property="deviceToken" column="deviceType" />
+		<result property="chatOn" column="chatOn" />
+		<result property="lastFlushGoldTime" column="lastFlushGoldTime" />
+		<result property="password" column="password" />
+	</resultMap>
+	<insert id="insert" parameterType="cn.litgame.wargame.core.model.Player">
+	    <![CDATA[
+	    	insert into player(playerId,password,deviceType,playerName,icon,gold,diamond,level,bindAccount,platformUid,platformType,status,createTime,lastLoginTime,vip,vipTime,deviceToken,chatOn,lastFlushGoldTime) 
+	    		values(#{playerId},#{password},#{deviceType},#{playerName},#{icon},#{gold},#{diamond},#{level},#{bindAccount},#{platformUid},#{platformType},#{status},#{createTime},#{lastLoginTime},#{vip},#{vipTime},#{deviceToken},#{chatOn},#{lastFlushGoldTime})
+	    ]]>
+	</insert>
+	<update id="update" parameterType="cn.litgame.wargame.core.model.Player">
+	   <![CDATA[
+	   	update player set deviceType = #{deviceType},password=#{password},playerName=#{playerName},icon=#{icon},gold=#{gold},diamond=#{diamond},level=#{level},bindAccount=#{bindAccount},platformUid=#{platformUid},platformType=#{platformType},status=#{status},
+	   		createTime=#{createTime},lastLoginTime=#{lastLoginTime},vip=#{vip},vipTime=#{vipTime},deviceToken=#{deviceToken},chatOn=#{chatOn},lastFlushGoldTime=#{lastFlushGoldTime} where playerId=#{playerId}
+	   ]]>
+	</update>
+	<select id="select" parameterType="long" resultMap="playerMap">
+	    <![CDATA[
+	    	select * from player where playerId = #{playerId}
+	    ]]>
+	</select>
+	<delete id="delete" parameterType="long">
+	    <![CDATA[
+	    	delete from player where playerId = #{playerId}
+	    ]]>
+	</delete>
+	<select id="selectAll" resultMap="playerMap">
+	    <![CDATA[
+	    	select * from player
+	    ]]>
+	</select>
+	<select id="selectByRange" resultMap="playerMap">
+	    <![CDATA[
+	    	select * from player limit #{0},#{1}
+	    ]]>
+	</select>
+	<select id="count" resultType="int">
+	    <![CDATA[
+	    	select count(*) from player
+	    ]]>
+	</select>
+</mapper>

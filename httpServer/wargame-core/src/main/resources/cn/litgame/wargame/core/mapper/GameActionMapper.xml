@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.GameActionMapper">
+
+	<resultMap id="gameActionMap" type="cn.litgame.wargame.core.model.GameAction">
+		<id property="actionId" column="actionId" />
+		<result property="actionType" column="actionType" />
+		<result property="sourcePlayerId" column="sourcePlayerId" />
+		<result property="targetPlayerId" column="targetPlayerId" />
+		<result property="sourceCityId" column="sourceCityId" />
+		<result property="targetCityId" column="targetCityId" />
+		<result property="actionData" column="actionData" />
+		<result property="createTime" column="createTime" />
+		<result property="overTime" column="overTime" />
+		<result property="shipCount" column="shipCount" />
+		<result property="loadingTime" column="loadingTime" />
+		<result property="actionState" column="actionState" />
+	</resultMap>
+
+	
+	<select id="getGameAction" parameterType="long" resultMap="gameActionMap">
+	    <![CDATA[
+	    	select * from game_action where actionId = #{actionId}
+	    ]]>
+	</select>
+	<update id="updateGameAction" parameterType="cn.litgame.wargame.core.model.GameAction">
+		<![CDATA[
+	     	update game_action set actionType=#{actionType},sourcePlayerId=#{sourcePlayerId},targetPlayerId=#{targetPlayerId},sourceCityId=#{sourceCityId},targetCityId=#{targetCityId},
+	     	actionData=#{actionData},createTime=#{createTime},overTime=#{overTime},shipCount=#{shipCount},loadingTime=#{loadingTime},actionState=#{actionState}
+	     
+	     	where actionId=#{actionId}
+	    ]]>
+	</update>
+	<insert id="createGameAction" parameterType="cn.litgame.wargame.core.model.GameAction" useGeneratedKeys="true" keyProperty="actionId">
+	     	insert into game_action (actionType,actionState,sourcePlayerId,targetPlayerId,sourceCityId,targetCityId,actionData,createTime,overTime,shipCount,loadingTime)
+	     	 values(#{actionType},#{actionState},#{sourcePlayerId},#{targetPlayerId},#{sourceCityId},#{targetCityId},#{actionData},#{createTime},#{overTime},#{shipCount},#{loadingTime})
+	</insert>
+	<delete id="delGameAction" parameterType="long">
+			delete from game_action where actionId = #{actionId}
+	</delete>
+
+	<select id="getGameActions" parameterType="long" resultMap="gameActionMap">
+			<![CDATA[
+				select * from game_action where  sourcePlayerId = #{playerId} or targetPlayerId = #{playerId}
+			]]>
+	</select>	
+
+	<select id="getGameActionByType" resultMap="gameActionMap">
+			<![CDATA[
+				select * from game_action where sourceCityId = #{0} and actionType = #{1}
+			]]>
+	</select>
+	<select id="getGameActionsByCity" resultMap="gameActionMap">
+			<![CDATA[
+				select * from game_action where sourceCityId = #{0} and actionState <= #{1}
+			]]>
+	</select>
+	<select id="getGameActionsByState" resultMap="gameActionMap">
+			<![CDATA[
+				select * from game_action where sourceCityId = #{0} and actionState = #{1} limit #{2}
+			]]>
+	</select>
+</mapper>

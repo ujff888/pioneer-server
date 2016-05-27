@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.TroopMapper">
+
+	<resultMap id="troopMap" type="cn.litgame.wargame.core.model.Troop">
+		<id property="troopId" column="troopId" />
+		<result property="playerId" column="playerId" />
+		<result property="cityId" column="cityId" />
+		<result property="troopType" column="troopType" />
+		<result property="troopResId" column="troopResId" />
+		<result property="count" column="count" />
+	</resultMap>
+	
+	<select id="getTroop" parameterType="long" resultMap="troopMap">
+	    <![CDATA[
+	    	select * from troop where troopId = #{troopId}
+	    ]]>
+	</select>
+	<update id="updateTroop" parameterType="cn.litgame.wargame.core.model.Troop">
+		<![CDATA[
+	     	update troop set troopResId=#{troopResId},count = #{count},cityId = #{cityId},playerId = #{playerId},troopType = #{troopType} where troopId = #{troopId}
+	    ]]>
+	</update>
+	<insert id="createTroop" parameterType="cn.litgame.wargame.core.model.Troop" useGeneratedKeys="true" keyProperty="troopId">
+	     	insert into troop (playerId,cityId,troopType,troopResId,count)
+	     	 values(#{playerId},#{cityId},#{troopType},#{troopResId},#{count})
+	</insert>
+	<delete id="delTroop" parameterType="long">
+			delete from troop where troopId = #{troopId}
+	</delete>
+	
+	<select id="getTroopsByPlayerId" parameterType="long" resultMap="troopMap">
+			<![CDATA[
+				select * from troop where playerId = #{playerId}
+			]]>
+	</select>
+	<select id="getTroopsByCityIdAndType" resultMap="troopMap">
+			<![CDATA[
+				select * from troop where cityId = #{0} and troopType = #{1}
+			]]>
+	</select>	
+	<select id="getTroopsByCityId" resultMap="troopMap">
+			<![CDATA[
+				select * from troop where cityId = #{cityId}
+			]]>
+	</select>
+	
+</mapper>

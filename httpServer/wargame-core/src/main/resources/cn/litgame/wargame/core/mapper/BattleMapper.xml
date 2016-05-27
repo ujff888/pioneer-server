@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.BattleMapper">
+	<resultMap id="battleMap" type="cn.litgame.wargame.core.model.Battle">
+		<id property="playerId" column="playerId" />
+		<result property="modelType" column="modelType" />
+		<result property="modelId" column="modelId" />
+		<result property="state" column="state" />
+		<result property="level" column="level" />
+		<result property="amount" column="amount" />
+		<result property="releaseTime" column="releaseTime" />
+	</resultMap>
+	<insert id="insert" parameterType="cn.litgame.wargame.core.model.Battle">
+	    <![CDATA[
+	    	
+	    ]]>
+	</insert>
+	<update id="update" parameterType="cn.litgame.wargame.core.model.Battle">
+	   <![CDATA[
+	   
+	   ]]>
+	</update>
+	<select id="getAllBattles" parameterType="long" resultMap="battleMap">
+	    <![CDATA[
+	    	
+	    ]]>
+	</select>
+	<select id="getBattlesByType" resultMap="battleMap">
+		<![CDATA[
+	    	
+	    ]]>
+	</select>
+	
+	<select id="getBattleById"  resultMap="battleMap">
+		<![CDATA[
+	    	
+	    ]]>
+	</select>
+	<delete id = "delBattleByType">
+		<![CDATA[
+			
+		]]>
+	</delete>
+	<delete id="delBattleById">
+	    <![CDATA[
+	    	delete from battle where playerId = #{0} and modelType = #{1} and modelId = #{2}
+	    ]]>
+	</delete>
+</mapper>

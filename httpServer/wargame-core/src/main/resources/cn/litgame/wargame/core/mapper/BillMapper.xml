@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.BillMapper">
+	
+	<resultMap id="billMap" type="cn.litgame.wargame.core.model.Bill">
+		<id property="orderId" column="orderId" />
+		<result property="playerId" column="playerId" />
+		<result property="diamond" column="diamond" />
+		<result property="productId" column="productId" />
+		<result property="createTime" column = "createTime" />		
+		<result property="rmb" column = "rmb" />
+	</resultMap>
+	<insert id="insert" parameterType="cn.litgame.wargame.core.model.Bill">
+	    <![CDATA[
+	    	insert into payment_bill(playerId,orderId,diamond,productId,createTime,rmb) values(
+	    	#{playerId},#{orderId},#{diamond},#{productId},#{createTime},#{rmb})
+	    ]]>
+	</insert>
+	
+	<select id="getBill" parameterType="string"  resultMap="billMap">
+	    <![CDATA[
+	    	select * from payment_bill where orderId = #{orderId}
+	    ]]>
+	</select>
+</mapper>

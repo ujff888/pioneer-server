@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybaatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.PackItemMapper">
+	
+	<resultMap id="packItemMap" type="cn.litgame.wargame.core.model.PackItem">
+		<id property="itemId" column="itemId" />
+		<result property="itemType" column="itemType" />
+		<result property="itemAmount" column="itemAmount" />
+		<result property="playerId" column="playerId" />
+	</resultMap>
+	<select id="getPackItem"  parameterType="long" resultMap="packItemMap">
+	    <![CDATA[
+	    	select * from packItems where itemId = #{itemId}
+	    ]]>
+	</select>
+	<select id="getPackItemByPlayerId"  parameterType="long" resultMap="packItemMap">
+	    <![CDATA[
+	    	select * from packitems where playerId = #{playerId}
+	    ]]>
+	</select>
+	<insert id="addPackItem" parameterType="cn.litgame.wargame.core.model.PackItem"  useGeneratedKeys="true" keyProperty="itemId">
+	    <![CDATA[
+	    	insert into packItems(itemType,playerId,itemAmount) values(#{itemType},#{playerId},#{itemAmount})
+	    ]]>
+	</insert>
+<!-- 	<select id="getItemAmountByType" resultMap="int">
+	    <![CDATA[
+	    	select count(*) from packItems where itemType = #{0} and playerId= #{1}
+	    ]]>
+	</select> -->
+	<update id="consumePackItem" parameterType="int">
+		<![CDATA[
+			update packItems itemAmount=itemAmount-1 where itemAmount=#{itemType}
+		]]>
+	</update>
+	<delete id="removePackItem" parameterType="long">
+		<![CDATA[
+			delete from packItems where itemId=#{itemId}
+		]]>
+	</delete>
+	
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.PlayerTechMapper">
+	
+	<resultMap id="playerTechMap" type="cn.litgame.wargame.core.model.PlayerTech">
+		<id property="playerId" column="playerId" />
+		<result property="techPoint" column="techPoint" />
+		<result property="lastFlushTime" column="lastFlushTime" />
+		<result property="flyProgress" column="flyProgress" />
+		<result property="economicProgress" column="economicProgress" />
+		<result property="scienceProgress" column="scienceProgress" />
+		<result property="militaryProgress" column="militaryProgress" />
+		<result property = "flyLevel" column = "flyLevel" />
+		<result property = "economicLevel" column = "economicLevel" />
+		<result property = "militaryLevel" column = "militaryLevel" />
+		<result property = "scienceLevel" column = "scienceLevel" />
+	</resultMap>
+	
+	<insert id="createPlayerTech" parameterType="cn.litgame.wargame.core.model.PlayerTech">
+		<![CDATA[
+			insert into player_tech(playerId,techPoint,lastFlushTime,flyProgress,economicProgress,scienceProgress,militaryProgress,
+				flyLevel,economicLevel,militaryLevel,scienceLevel) 
+				values(#{playerId},#{techPoint},#{lastFlushTime},#{flyProgress},#{economicProgress},#{scienceProgress},#{militaryProgress},#{flyLevel},#{economicLevel},#{militaryLevel},#{scienceLevel})
+		]]>
+	</insert>
+	
+	<select id="getPlayerTech" parameterType="long" resultMap="playerTechMap">
+	    <![CDATA[
+	    	select * from player_tech where playerId = #{playerId}
+	    ]]>
+	</select>
+
+	<update id="updatePlayerTech" parameterType="cn.litgame.wargame.core.model.PlayerTech">
+		<![CDATA[
+			update player_tech set techPoint=#{techPoint}, lastFlushTime=#{lastFlushTime},flyProgress=#{flyProgress},economicProgress=#{economicProgress}
+			,scienceProgress=#{scienceProgress},militaryProgress=#{militaryProgress},flyLevel=#{flyLevel},economicLevel=#{economicLevel},militaryLevel=#{militaryLevel},scienceLevel=#{scienceLevel}
+				where playerId=#{playerId}
+		]]>
+	</update>
+	<delete id="deletePlayerTech"  parameterType="long" >
+		<![CDATA[
+			delete from player_tech where playerId = #{playerId}
+		]]>
+	</delete>
+
+</mapper>

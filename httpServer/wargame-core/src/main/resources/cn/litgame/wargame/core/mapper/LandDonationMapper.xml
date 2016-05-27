@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.LandDonationMapper">
+	
+	<resultMap id="landDonationMap" type="cn.litgame.wargame.core.model.LandDonation">
+		<id property="id" column="id" />
+		<result property="landId" column="landId" />
+		<result property="playerId" column="playerId" />
+		<result property="cityId" column="cityId" />
+		<result property="woodDonationCount" column="woodDonationCount" />
+		<result property="resourceDonationCount" column="resourceDonationCount" />
+	</resultMap>
+	<select id="getLandDonations" parameterType="int"  resultMap="landDonationMap">
+	    <![CDATA[
+	    	select * from landDonation where landId=#{landId}
+	    ]]>
+	</select>
+	<select id="getLandDonation" resultMap="landDonationMap">
+	    <![CDATA[
+	    	select * from landDonation where landId=#{0} and playerId = #{1} and cityId = #{2}
+	    ]]>
+	</select>
+	
+	<select id="getCityCountByLandId" parameterType="int" resultType="int">
+	    <![CDATA[
+	    	select count(*) from landDonation where landId=#{landId}
+	    ]]>
+	</select>
+
+	<insert id="createLandDonation" parameterType="cn.litgame.wargame.core.model.LandDonation"  useGeneratedKeys="true" keyProperty="id">
+	    <![CDATA[
+	    	insert into landDonation(landId,cityId,playerId,woodDonationCount,resourceDonationCount) values(#{landId},#{cityId},#{playerId},#{woodDonationCount},#{resourceDonationCount})
+	    ]]>
+	</insert>
+	<update id="updateLandDonation" parameterType="cn.litgame.wargame.core.model.LandDonation">
+		<![CDATA[
+			update landDonation set playerId=#{playerId},woodDonationCount=#{woodDonationCount},resourceDonationCount=#{resourceDonationCount},landId=#{landId},cityId=#{cityId}
+				where id = #{id}
+		]]>
+	</update>
+	<delete id="deleteLandDonation" parameterType="int">
+		<![CDATA[
+			delete from landDonation where id = #{id}
+		]]>
+	</delete>
+</mapper>

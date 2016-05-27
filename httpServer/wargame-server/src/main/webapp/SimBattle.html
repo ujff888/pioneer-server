@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>战斗模拟器</title>
+<style>
+input {
+	text-align: center;
+}
+</style>
+<script src="js/jquery-1.12.4.min.js"></script>
+</head>
+<body>
+
+	<form id="simForm" >
+		<table border="1" align="center" style="text-align: center">
+			<tr>
+				<th>参数</th>
+				<th>值</th>
+			</tr>
+			<tr>
+				<td>战场等级</td>
+				<td><select name="battleFieldLevel">
+						<option value="1">1</option>
+						<option value="5">5</option>
+				</select></td>
+			</tr>
+			<tr>
+				<td>每回合士气减少百分比</td>
+				<td><input name="moraleDownPercent" type="number" min="0"
+					value="10" />%</td>
+			</tr>
+			<tr>
+				<td>劣势方士气额外减少百分比</td>
+				<td><input name="weakMoraleExtra" type="number" min="0"
+					value="0" />%</td>
+			</tr>
+			<tr>
+				<td>士气加成百分比</td>
+				<td><input name="moraleBuffIndex" type="number" min="0"
+					value="0" />%</td>
+			</tr>
+		</table>
+		<hr />
+		<table border="1" align="center" style="text-align: center">
+			<tr>
+				<th>兵力</th>
+				<th>进攻方</th>
+				<th>防守方</th>
+			</tr>
+			<tr>
+				<td>蛮奴军</td>
+				<td><input name="2001o" type="number" min="0" value="0" /></td>
+				<td><input name="2001d" type="number" min="0" value="0" /></td>
+			</tr>
+			<tr>
+				<td>精灵弩手</td>
+				<td><input name="2002o" type="number" min="0" value="0" /></td>
+				<td><input name="2002d" type="number" min="0" value="0" /></td>
+			</tr>
+			<tr>
+				<td>狙击手</td>
+				<td><input name="2003o" type="number" min="0" value="0" /></td>
+				<td><input name="2003d" type="number" min="0" value="0" /></td>
+			</tr>
+			<tr>
+				<td>巨斧战士</td>
+				<td><input name="2004o" type="number" min="0" value="0" /></td>
+				<td><input name="2004d" type="number" min="0" value="0" /></td>
+			</tr>
+			<tr>
+				<td>骑士</td>
+				<td><input name="2005o" type="number" min="0" value="0" /></td>
+				<td><input name="2005d" type="number" min="0" value="0" /></td>
+			</tr>
+			<tr>
+				<td>剑圣</td>
+				<td><input name="2006o" type="number" min="0" value="0" /></td>
+				<td><input name="2006d" type="number" min="0" value="0" /></td>
+			</tr>
+			<tr>
+				<td>钢铁战神</td>
+				<td><input name="2007o" type="number" min="0" value="0" /></td>
+				<td><input name="2007d" type="number" min="0" value="0" /></td>
+			</tr>
+			<tr>
+				<td>无人轰炸机</td>
+				<td><input name="2008o" type="number" min="0" value="0" /></td>
+				<td><input name="2008d" type="number" min="0" value="0" /></td>
+			</tr>
+			<tr>
+				<td>聚能战士</td>
+				<td><input name="2009o" type="number" min="0" value="0" /></td>
+				<td><input name="2009d" type="number" min="0" value="0" /></td>
+			</tr>
+			<tr>
+				<td>攻城车</td>
+				<td><input name="2010o" type="number" min="0" value="0" /></td>
+				<td><input name="2010d" type="number" min="0" value="0" /></td>
+			</tr>
+			<tr>
+				<td>投石器</td>
+				<td><input name="2011o" type="number" min="0" value="0" /></td>
+				<td><input name="2011d" type="number" min="0" value="0" /></td>
+			</tr>
+			<tr>
+				<td>导弹发射器</td>
+				<td><input name="2012o" type="number" min="0" value="0" /></td>
+				<td><input name="2012d" type="number" min="0" value="0" /></td>
+			</tr>
+			<tr>
+				<td colspan="3"><input type="button" value="模拟"
+					onclick="simulate()" /> <input type="reset" value="重置" /></td>
+			</tr>
+
+		</table>
+	</form>
+	<h2>战斗结果</h2>
+	<div id="result"></div>
+</body>
+<script>
+	function simulate() {
+		htmlobj = $.ajax({
+			url : "/sim.lc",
+			async : false,
+			data : $("#simForm").serialize(),
+			method : "POST"
+		});
+		$("#result").html(htmlobj.responseText);
+	}
+</script>
+</html>

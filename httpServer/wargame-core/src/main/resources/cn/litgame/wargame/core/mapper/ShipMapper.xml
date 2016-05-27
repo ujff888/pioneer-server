@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.ShipMapper">
+	
+	<resultMap id="shipMap" type="cn.litgame.wargame.core.model.Ship">
+		<id property="shipId" column="shipId" />
+		<result property="playerId" column="playerId" />
+		<result property="shipType" column="shipType" />
+		<result property="count" column="count" />
+	</resultMap>
+	
+	<insert id="addShip" parameterType="cn.litgame.wargame.core.model.Ship" useGeneratedKeys="true" keyProperty="shipId">
+	    <![CDATA[
+	    	insert into ship(playerId,shipType,count) values(#{playerId},#{shipType},#{count})
+	    ]]>
+	</insert>
+	
+	<select id="getShipByType" resultMap="shipMap">
+	    <![CDATA[
+	    	select * from ship where playerId=#{0} and shipType = #{1}
+	    ]]>
+	</select>
+	
+	<select id="getShipsByPlayerId" parameterType="long"  resultMap="shipMap">
+	    <![CDATA[
+	    	select * from ship where playerId=#{playerId}
+	    ]]>
+	</select>
+	
+	<update id="updateShip" parameterType="cn.litgame.wargame.core.model.Ship">
+		<![CDATA[
+			update ship set playerId=#{playerId},shipType=#{shipType},count=#{count} 
+				where shipId=#{shipId}
+		]]>
+	</update>
+	<delete id="delShip" parameterType="long">
+		<![CDATA[
+			delete from ship where shipId=#{shipId}
+		]]>
+	</delete>
+</mapper>

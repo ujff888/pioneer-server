@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.CityMapper">
+	
+	<resultMap id="cityMap" type="cn.litgame.wargame.core.model.City">
+		<id property="cityId" column="cityId" />
+		<result property="playerId" column="playerId" />
+		<result property="position" column="position" />
+		<result property="landId" column="landId" />
+		<result property="food" column="food" />
+		<result property="stone" column="stone" />
+		<result property="crystal" column="crystal" />
+		<result property="metal" column="metal" />
+		<result property="wood" column="wood" />
+		<result property="level" column="level" />
+		<result property="isCapital" column="isCapital" />
+		<result property="cityName" column="cityName" />
+		<result property="totalPerson" column="totalPerson" />
+		<result property="woodWorker" column="woodWorker" />
+		<result property="resourceWorker" column="resourceWorker" />
+		<result property="scientist" column="scientist" />
+		<result property="lastSetTime" column="lastSetTime" />
+		<result property="lastResourceSetTime" column="lastResourceSetTime" />
+		<result property="createCityTime" column="createCityTime" />
+		<result property="cityStatus" column="cityStatus" />
+		
+	</resultMap>
+	
+	<select id="getCitysByPlayerId" parameterType="long" resultMap="cityMap">
+		<![CDATA[
+			select * from city where playerId = #{playerId}
+		]]>
+	</select>
+	
+	<select id="getCity" parameterType="int" resultMap="cityMap">
+		<![CDATA[
+			select * from city where cityId = #{cityId}
+		]]>
+	</select>
+	<select id="getCityByPos" resultMap="cityMap">
+		<![CDATA[
+			select * from city where landId = #{0} and position = #{1}
+		]]>
+	</select>
+	<select id="getCityByLandId" parameterType="int" resultMap="cityMap">
+		<![CDATA[
+			select * from city where landId = #{landId}
+		]]>
+	</select>
+	<update id="updateCity" parameterType="cn.litgame.wargame.core.model.City">
+		<![CDATA[
+			update city set cityName=#{cityName}, cityStatus = #{cityStatus},position=#{position},food=#{food},stone=#{stone},landId=#{landId},crystal=#{crystal},metal=#{metal},wood=#{wood},level=#{level},isCapital=#{isCapital}
+			 ,totalPerson=#{totalPerson},woodWorker=#{woodWorker},resourceWorker=#{resourceWorker},scientist=#{scientist},lastSetTime=#{lastSetTime},lastResourceSetTime=#{lastResourceSetTime},createCityTime=#{createCityTime} 
+				where cityId=#{cityId}
+		]]>
+	</update>
+	<delete id="delCity" parameterType="int">
+		<![CDATA[
+			delete from city where cityId = #{cityId}
+		]]>
+	</delete>
+	<insert id="createCity"  parameterType="cn.litgame.wargame.core.model.City"  useGeneratedKeys="true" keyProperty="cityId">
+		<![CDATA[
+			insert into city(cityName,cityStatus,landId,position,playerId,food,stone,crystal,metal,wood,level,isCapital,totalPerson,woodWorker,resourceWorker,scientist,lastSetTime,lastResourceSetTime,createCityTime)
+				values(#{cityName},#{cityStatus},#{landId},#{position},#{playerId},#{food},#{stone},#{crystal},#{metal},#{wood},#{level},#{isCapital},#{totalPerson},#{woodWorker},#{resourceWorker},#{scientist},#{lastSetTime},#{lastResourceSetTime},#{createCityTime})
+		]]>
+	</insert>
+	<select id= "getCityCount" parameterType="long" resultType="int">
+		<![CDATA[
+			select count(*) from city where playerId = #{playerId}
+		]]>			
+	</select>
+	<select id="selectByRange" resultMap="cityMap">
+	    <![CDATA[
+			select * from city limit #{0},#{1}
+		]]>	
+	</select>
+	<select id="count" resultType="int">
+	    <![CDATA[
+			select count(*) from city 
+		]]>	
+	</select>
+</mapper>

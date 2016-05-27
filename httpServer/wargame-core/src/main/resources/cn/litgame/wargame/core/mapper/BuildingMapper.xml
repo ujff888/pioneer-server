@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.BuildingMapper">
+	
+	<resultMap id="buildingMap" type="cn.litgame.wargame.core.model.Building">
+		<id property="id" column="id" />
+		<result property="cityId" column="cityId" />
+		<result property="position" column="position" />
+		<result property="buildId" column="buildId" />
+		<result property="level" column="level" />
+		<result property="isBuilding" column="isBuilding" />
+		<result property="buildTime" column="buildTime" />
+		<result property="count" column="count" />
+		<result property="playerId" column ="playerId" />
+	</resultMap>
+	<select id="getBuildings" parameterType="int" resultMap="buildingMap">
+	    <![CDATA[
+	    	select * from building where cityId = #{cityId}
+	    ]]>
+	</select>
+	
+	<select id="getBuildsByPlayerId" resultMap="buildingMap">
+	    <![CDATA[
+	    	select * from building where playerId = #{0} and buildId = #{1}
+	    ]]>
+	</select>	
+	<select id="getBuildingsByBuildId" resultMap="buildingMap">
+	    <![CDATA[
+	    	select * from building where cityId = #{0} and buildId = #{1}
+	    ]]>
+	</select>
+	<update id="updateBuilding" parameterType="cn.litgame.wargame.core.model.Building">
+		<![CDATA[
+			update building set count=#{count}, level=#{level},isBuilding=#{isBuilding},buildTime=#{buildTime}
+				where cityId=#{cityId} and position=#{position}
+		]]>
+	</update>
+	<select id="getBuilding" resultMap="buildingMap">
+	    <![CDATA[
+	    	select * from building where cityId = #{0} and position = #{1}
+	    ]]>
+	</select>
+	<delete id="delBuilding" parameterType="long">
+		<![CDATA[
+			delete from building where id = #{id}
+		]]>
+	</delete>
+	<insert id="createBuilding" parameterType="cn.litgame.wargame.core.model.Building" useGeneratedKeys="true" keyProperty="id">
+		<![CDATA[
+			insert into building(cityId,buildId,level,isBuilding,buildTime,position,count,playerId) 
+				values(#{cityId},#{buildId},#{level},#{isBuilding},#{buildTime},#{position},#{count},#{playerId})
+		]]>
+	</insert>
+</mapper>

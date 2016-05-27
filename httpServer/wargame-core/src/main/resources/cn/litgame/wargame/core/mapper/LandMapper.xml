@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.LandMapper">
+	
+	<resultMap id="landMap" type="cn.litgame.wargame.core.model.Land">
+		<id property="landId" column="landId" />
+		<result property="woodLevel" column="woodLevel" />
+		<result property="woodExp" column="woodExp" />
+		<result property="resourceLevel" column="resourceLevel" />
+		<result property="resourceExp" column="resourceExp" />
+		<result property = "woodTime" column="woodTime" />
+		<result property = "resourceTime" column = "resourceTime" />
+	</resultMap>
+	
+	<insert id="createLand" parameterType="cn.litgame.wargame.core.model.Land">
+	    <![CDATA[
+	    	insert into land(landId,woodLevel,woodExp,woodTime,resourceLevel,resourceExp,resourceTime) values(#{landId},#{woodLevel},#{woodExp},#{woodTime},#{resourceLevel},#{resourceExp},#{resourceTime})
+	    ]]>
+	</insert>
+	<select id="getLand" parameterType="int"  resultMap="landMap">
+	    <![CDATA[
+	    	select * from land where landId=#{landId}
+	    ]]>
+	</select>
+	<update id="updateLand" parameterType="cn.litgame.wargame.core.model.Land">
+		<![CDATA[
+			update land set woodLevel=#{woodLevel},woodExp=#{woodExp},resourceLevel=#{resourceLevel},resourceExp=#{resourceExp},woodTime = #{woodTime},resourceTime=#{resourceTime}
+				where landId=#{landId}
+		]]>
+	</update>
+	<delete id="deleteLand" parameterType="int">
+		<![CDATA[
+			delete from land where landId=#{landId}
+		]]>
+	</delete>
+</mapper>

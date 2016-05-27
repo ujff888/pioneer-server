@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.GameNoticeMapper">
+
+	<resultMap id="gameNoticeMap" type="cn.litgame.wargame.core.model.GameNotice">
+		<id property="id" column="id" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="startTime" column="startTime" />
+		<result property="endTime" column="endTime" />
+		<result property="createTime" column="createTime" />
+	</resultMap>
+
+	
+	<select id="getGameNoticeByTime" parameterType="java.sql.Timestamp" resultMap="gameNoticeMap">
+	    <![CDATA[
+	    	select * from game_notice where startTime <= #{time} and endTime >= #{time}
+	    ]]>
+	</select>
+	
+	<select id="select" resultMap="gameNoticeMap">
+		<![CDATA[
+			select * from game_notice
+		]]>
+			
+	</select>
+	
+	<select id="getGameNoticeById" parameterType="int" resultMap="gameNoticeMap">
+			<![CDATA[
+				select * from game_notice where id = #{id}
+			]]>
+	</select>
+	
+	<update id="update" parameterType="cn.litgame.wargame.core.model.GameNotice">
+	     	update game_notice set title=#{title},content=#{content},startTime=#{startTime},endTime=#{endTime} where id = #{id}
+	</update>
+	<insert id="insert" parameterType="cn.litgame.wargame.core.model.GameNotice">
+	     	insert into game_notice (title,content,startTime,endTime,createTime) values(#{title},#{content},#{startTime},#{endTime},#{createTime})
+	</insert>
+	<delete id="delete" parameterType="int">
+			delete from game_notice where id = #{id}
+	</delete>
+	
+</mapper>

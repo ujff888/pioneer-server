@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.litgame.wargame.core.mapper.PlayerStateMapper">
+
+	<resultMap id="playerStateMap" type="cn.litgame.wargame.core.model.PlayerState">
+		<id property="playerId" column="playerId" />
+		<result property="shipCost" column="shipCost" />
+		<result property="landCost" column="landCost" />
+		<result property="shipSpeed" column="shipSpeed"/>
+		<result property="buildCost" column="buildCost" />
+		<result property="addPublicOpinion" column="addPublicOpinion" />
+		<result property="addPopulationCount" column="addPopulationCount" />
+		<result property="addPublicOpinionInCapital" column="addPublicOpinionInCapital" />
+		<result property="addPopulationCountInCapital" column="addPopulationCountInCapital" />
+		<result property="addTechPoint" column="addTechPoint" />
+		<result property="techCost" column="techCost" />
+		<result property="function" column="function" />
+		<result property="system" column="system" />
+		<result property="targetSystemId" column = "targetSystemId" />
+		<result property = "overSystemTime" column = "overSystemTime" />
+	</resultMap>
+	<insert id="createPlayerState" parameterType="cn.litgame.wargame.core.model.PlayerState">
+	    <![CDATA[
+	    	insert into player_state(playerId,shipCost,landCost,shipSpeed,buildCost,addPublicOpinion,addPopulationCount,addPublicOpinionInCapital,addPopulationCountInCapital,addTechPoint,techCost,function,system,targetSystemId,overSystemTime) 
+	    		values(#{playerId},#{shipCost},#{landCost},#{shipSpeed},#{buildCost},#{addPublicOpinion},#{addPopulationCount},#{addPublicOpinionInCapital},#{addPopulationCountInCapital},#{addTechPoint},#{techCost},#{function},#{system},#{targetSystemId},#{overSystemTime})
+	    ]]>
+	</insert>
+	<update id="updatePlayerState" parameterType="cn.litgame.wargame.core.model.PlayerState">
+	   <![CDATA[
+	   	update player_state set shipCost = #{shipCost},landCost=#{landCost},shipSpeed=#{shipSpeed},buildCost=#{buildCost},addPublicOpinion=#{addPublicOpinion},addPopulationCount=#{addPopulationCount},addPublicOpinionInCapital=#{addPublicOpinionInCapital},addPopulationCountInCapital=#{addPopulationCountInCapital},addTechPoint=#{addTechPoint},techCost=#{techCost},
+	   		function=#{function},system=#{system},targetSystemId = #{targetSystemId},overSystemTime = #{overSystemTime} where playerId=#{playerId}
+	   ]]>
+	</update>
+	<select id="getPlayerState" parameterType="long" resultMap="playerStateMap">
+	    <![CDATA[
+	    	select * from player_state where playerId = #{playerId}
+	    ]]>
+	</select>
+	
+	<delete id="delPlayerState" parameterType="long">
+	    <![CDATA[
+	    	delete from player_state where playerId = #{playerId}
+	    ]]>
+	</delete>
+</mapper>
