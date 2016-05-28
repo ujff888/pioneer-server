@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
-import cn.litgame.wargame.core.model.BattleTroop;
 import cn.litgame.wargame.core.model.battle.Damage;
+import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
 
 /**
  * 空战类型
@@ -19,8 +19,8 @@ public class FlyAirBattleUnit extends BattleUnit {
 			BattleFieldType.FIELD_FLY
 	};
 	
-	public FlyAirBattleUnit(BattleTroop bt) {
-		super(bt);
+	public FlyAirBattleUnit(BattleTroop bt, int count, long playerId, int cityId) {
+		super(bt, count, playerId, cityId);
 	}
 
 	@Override

@@ -67,14 +67,17 @@ public class BattleLogic {
 		BattleField battleField = new BattleField(offenceArmys, defenceArmys, battleGround, isLand, cityId);
 		String redis_key = "battleField_cache";	
 		
-		try(ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				ObjectOutputStream oos = new ObjectOutputStream(bos);
-				Jedis jedis = jedisStoragePool.getResource();){
-			
+		
+		Jedis jedis = jedisStoragePool.getResource();
+		try{
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			oos.writeObject(battleField);
 			jedis.set(redis_key.getBytes(), bos.toByteArray());
 		} catch (IOException e) {
 			log.error(e);
+		} finally{
+			jedis.close();
 		}
 	}
 	

@@ -1,6 +1,8 @@
 package cn.litgame.wargame.core.model;
    import java.util.List;
 
+import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
+
 public class Battle {
 	private long playerId;
 	/**

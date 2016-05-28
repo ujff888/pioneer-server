@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
-import cn.litgame.wargame.core.model.BattleTroop;
 import cn.litgame.wargame.core.model.battle.Damage;
+import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
 
 /**
  * 轻型部队
@@ -27,8 +27,8 @@ public class LightBattleUnit extends BattleUnit {
 			BattleFieldType.FIELD_CLOSE
 	};
 	
-	public LightBattleUnit(BattleTroop bt) {
-		super(bt);
+	public LightBattleUnit(BattleTroop bt, int count, long playerId, int cityId) {
+		super(bt, count, playerId, cityId);
 	}
 
 	@Override

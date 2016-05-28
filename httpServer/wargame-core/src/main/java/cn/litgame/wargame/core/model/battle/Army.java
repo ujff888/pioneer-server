@@ -8,10 +8,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
+import cn.litgame.wargame.core.auto.GameProtos;
 import cn.litgame.wargame.core.auto.GameProtos.Troop;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
+import cn.litgame.wargame.core.auto.GameResProtos.ResTroop;
 import cn.litgame.wargame.core.auto.GameResProtos.TroopType;
-import cn.litgame.wargame.core.model.BattleTroop;
+import cn.litgame.wargame.core.logic.ConfigLogic;
+import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
+import cn.litgame.wargame.core.model.battle.troop.TroopHandler;
 import cn.litgame.wargame.core.model.battle.unit.BattleUnit;
 import cn.litgame.wargame.core.model.battle.unit.FireBattleUnit;
 import cn.litgame.wargame.core.model.battle.unit.FlyAirBattleUnit;
@@ -29,194 +35,114 @@ import cn.litgame.wargame.core.model.battle.unit.WeightBattleUnit;
  *
  */
 public class Army implements Serializable{
-	private static final long serialVersionUID = -4595006475981998252L;
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3516389017448464560L;
+
+	@Resource(name = "configLogic")
+	private static ConfigLogic configLogic;
+	
 	private long playerId;
 	private int cityId;
 	
-	private static class FireComparator implements Comparator<BattleUnit>{
+	private static class FireComparator implements Comparator<BattleTroop>{
 		static final FireComparator INSTANCE = new FireComparator();
 		private FireComparator(){}
 		@Override
-		public int compare(BattleUnit o1, BattleUnit o2) {
-			if(o2.getAmount() != 0){
-				if(o1.getAmount() != 0)
-					return o1.getAttack2() - o2.getAttack2();
+		public int compare(BattleTroop o1, BattleTroop o2) {
+			if(o2.getResTroop().getAmount() != 0){
+				if(o1.getResTroop().getAmount() != 0)
+					return o1.getResTroop().getAttack2() - o2.getResTroop().getAttack2();
 				else
-					return o1.getAttack() - o2.getAttack2();
+					return o1.getResTroop().getAttack() - o2.getResTroop().getAttack2();
 			}else{
-				if(o1.getAmount() != 0)
-					return o1.getAttack2() - o2.getAttack();
+				if(o1.getResTroop().getAmount() != 0)
+					return o1.getResTroop().getAttack2() - o2.getResTroop().getAttack();
 				else
-					return o1.getAttack() - o2.getAttack();
+					return o1.getResTroop().getAttack() - o2.getResTroop().getAttack();
 			}
 		}
 	} 
 	
-	private static class Attack2Comparator implements Comparator<BattleUnit>{
+	private static class Attack2Comparator implements Comparator<BattleTroop>{
 		static final Attack2Comparator INSTANCE = new Attack2Comparator();
 		@Override
-		public int compare(BattleUnit o1, BattleUnit o2) {
-			return o1.getAttack2() - o2.getAttack2();
+		public int compare(BattleTroop o1, BattleTroop o2) {
+			return o1.getResTroop().getAttack2() - o2.getResTroop().getAttack2();
 		}
 	}
 
-	private static class AttackComparator implements Comparator<BattleUnit>{
+	private static class AttackComparator implements Comparator<BattleTroop>{
 		static final AttackComparator INSTANCE = new AttackComparator();
 		@Override
-		public int compare(BattleUnit o1, BattleUnit o2) {
-			return o1.getAttack() - o2.getAttack();
+		public int compare(BattleTroop o1, BattleTroop o2) {
+			return o1.getResTroop().getAttack() - o2.getResTroop().getAttack();
 		}
 	}
 
-	private static class FlyComparator implements Comparator<BattleUnit>{
+	private static class FlyComparator implements Comparator<BattleTroop>{
 		static final FlyComparator INSTANCE = new FlyComparator();
 		@Override
-		public int compare(BattleUnit o1, BattleUnit o2) {
-			if(o1.getAmount() != 0){
-				if(o2.getAmount() != 0){
-					return o1.getAttack2() - o2.getAttack2();
+		public int compare(BattleTroop o1, BattleTroop o2) {
+			if(o1.getResTroop().getAmount() != 0){
+				if(o2.getResTroop().getAmount() != 0){
+					return o1.getResTroop().getAttack2() - o2.getResTroop().getAttack2();
 				}
 				return 1;
 			}else{
-				if(o2.getAmount() != 0){
+				if(o2.getResTroop().getAmount() != 0){
 					return -1;
 				}
 				return 0;
 			}
 		}
 	}
-
+	
 	//后备部队
-	private Map<TroopType, List<BattleUnit>> backupTroops = new HashMap<>();
+	private Map<TroopType, List<BattleTroop>> backupBattleTroops = new HashMap<>();
 	//private Map<Integer, Integer> backupTroopsCount = new HashMap<>();
 
 	public Army(long playerId, int cityId) {
 		this.setPlayerId(playerId);
 		this.setCityId(cityId);
-		
-		List<BattleUnit> fly = new ArrayList<>();
-		List<BattleUnit> flyFire = new ArrayList<>();
-		List<BattleUnit> fire = new ArrayList<>();
-		List<BattleUnit> remote = new ArrayList<>();
-		List<BattleUnit> weight = new ArrayList<>();
-		List<BattleUnit> light = new ArrayList<>();
-		List<BattleUnit> logistics = new ArrayList<>();
-		List<BattleUnit> npc = new ArrayList<>();
-		List<BattleUnit> remoteOutOfAmmo = new ArrayList<>();
-			
-		backupTroops.put(TroopType.FLY_AIR, fly);
-		backupTroops.put(TroopType.FLY_FIRE, flyFire);
-		backupTroops.put(TroopType.FIRE, fire);
-		backupTroops.put(TroopType.REMOTE, remote);
-		backupTroops.put(TroopType.WEIGHT, weight);
-		backupTroops.put(TroopType.LIGHT, light);
-		backupTroops.put(TroopType.LOGISTICS, logistics);
-		backupTroops.put(TroopType.NPC, npc);
-		backupTroops.put(TroopType.REMOTE_NO_AMMO, remoteOutOfAmmo);//没有弹药的远程
 	}
 	
 	public Army(long playerId, int cityId, List<BattleTroop> battleTroops) {
 		this(playerId, cityId);
-
+		
 		for(BattleTroop bt : battleTroops) {
-			//把军队实例化成具体的作战单位并分队
-			int count = bt.getCount();
 			TroopType troopType = bt.getResTroop().getTroopType();
-			switch(troopType){
-			case REMOTE:
-				for(int i=0;i<count;i++){
-					BattleUnit bu = new RemoteBattleUnit(bt);
-					
-					bu.setPlayerId(this.getPlayerId());
-					bu.setCityId(this.getCityId());
-					
-					this.getBackupTroopsByType(troopType).add(bu);
-				}
-				break;
-			case LIGHT:
-				for(int i=0;i<count;i++){
-					BattleUnit bu = new LightBattleUnit(bt);
-					
-					bu.setPlayerId(this.getPlayerId());
-					bu.setCityId(this.getCityId());
-					
-					this.getBackupTroopsByType(troopType).add(bu);
-				}
-				break;
-			case WEIGHT:
-				for(int i=0;i<count;i++){
-					BattleUnit bu = new WeightBattleUnit(bt);
-					
-					bu.setPlayerId(this.getPlayerId());
-					bu.setCityId(this.getCityId());
-					
-					this.getBackupTroopsByType(troopType).add(bu);
-				}
-				break;
-			case FLY_AIR:
-				for(int i=0;i<count;i++){
-					BattleUnit bu = new FlyAirBattleUnit(bt);
-					
-					bu.setPlayerId(this.getPlayerId());
-					bu.setCityId(this.getCityId());
-					
-					this.getBackupTroopsByType(troopType).add(bu);
-				}
-				break;
-			case FLY_FIRE:
-				for(int i=0;i<count;i++){
-					BattleUnit bu = new FlyFireBattleUnit(bt);
-					
-					bu.setPlayerId(this.getPlayerId());
-					bu.setCityId(this.getCityId());
-					
-					this.getBackupTroopsByType(troopType).add(bu);
-				}
-				break;
-			case FIRE:
-				for(int i=0;i<count;i++){
-					BattleUnit bu = new FireBattleUnit(bt);
-					
-					bu.setPlayerId(this.getPlayerId());
-					bu.setCityId(this.getCityId());
-					
-					this.getBackupTroopsByType(troopType).add(bu);
-				}
-				break;
-			case LOGISTICS:
-				for(int i=0;i<count;i++){
-					BattleUnit bu = new LogisticsBattleUnit(bt);
-					
-					bu.setPlayerId(this.getPlayerId());
-					bu.setCityId(this.getCityId());
-					
-					this.getBackupTroopsByType(troopType).add(bu);
-				}
-				break;
-			case NPC:
-				for(int i=0;i<count;i++){
-					BattleUnit bu = new NpcBattleUnit(bt);
-					
-					bu.setPlayerId(this.getPlayerId());
-					bu.setCityId(this.getCityId());
-					
-					this.getBackupTroopsByType(troopType).add(bu);
-				}
-				break;
-			default:
-				break;
-			}
+			
+			//把军队分队
+			List<BattleTroop> battleTroopList = this.getBackupBattleTroopsByType(troopType);
+
+			if(bt.getCount() >0)
+				battleTroopList.add(bt);
+			this.backupBattleTroops.put(troopType, battleTroopList);
+			
+			//TODO：BattleTroop这个对象多态掉，不同的士兵，应该自己知道去哪里，多态的实现方式参照server服务器里面的handler自动注册，自动多态调用的方式，不需要switch函数
 		}
 	}
 	
-	Map<TroopType, List<BattleUnit>> getBackupTroops() {
-		return this.backupTroops;
+	public Map<TroopType, List<BattleTroop>> getBackupBattleTroops() {
+		return backupBattleTroops;
+	}
+
+	public void setBackupBattleTroops(Map<TroopType, List<BattleTroop>> backupBattleTroops) {
+		this.backupBattleTroops = backupBattleTroops;
 	}
 	
-	List<BattleUnit> getBackupTroopsByType(TroopType troopType) {
-		return this.backupTroops.get(troopType);
+	public List<BattleTroop> getBackupBattleTroopsByType(TroopType troopType) {
+		List<BattleTroop> troops = this.getBackupBattleTroops().get(troopType);
+		if(troops == null){
+			troops = new ArrayList<>();
+			this.getBackupBattleTroops().put(troopType, troops);
+		}
+		return troops;
 	}
-	
+
 	public long getPlayerId() {
 		return playerId;
 	}
@@ -234,103 +160,108 @@ public class Army implements Serializable{
 	}
 
 	/**
-	 * 将指定战场位置的后备作战单位移出
-	 * 
-	 * @param position
-	 */
-	void popAUnitFromBackup(FieldPosition position) {
-		int index;
-		switch(position.getType()){
-		case FIELD_FIRE:
-			index = this.getBackupTroopsByType(TroopType.FIRE).size()-1;
-			this.getBackupTroopsByType(TroopType.FIRE).remove(index);
-			break;
-		case FIELD_FLY_FIRE:
-			index = this.getBackupTroopsByType(TroopType.FLY_FIRE).size()-1;
-			this.getBackupTroopsByType(TroopType.FLY_FIRE).remove(index);
-			break;
-		case FIELD_REMOTE:
-			index = this.getBackupTroopsByType(TroopType.REMOTE).size()-1;
-			this.getBackupTroopsByType(TroopType.REMOTE).remove(index);
-			break;
-		case FIELD_SIDE:
-			index = this.getBackupTroopsByType(TroopType.LIGHT).size()-1;
-			this.getBackupTroopsByType(TroopType.LIGHT).remove(index);
-			break;
-		case FIELD_FLY:
-			index = this.getBackupTroopsByType(TroopType.FLY_AIR).size()-1;
-			this.getBackupTroopsByType(TroopType.FLY_AIR).remove(index);
-			break;
-		case FIELD_CLOSE:
-			if(backupTroops.get(TroopType.WEIGHT).size() > 0){
-				index = this.getBackupTroopsByType(TroopType.WEIGHT).size()-1;
-				this.getBackupTroopsByType(TroopType.WEIGHT).remove(index);
-			}else{
-				if(backupTroops.get(TroopType.LIGHT).size() > 0){
-					index = this.getBackupTroopsByType(TroopType.LIGHT).size()-1;
-					this.getBackupTroopsByType(TroopType.LIGHT).remove(index);
-				}else{
-					//没有弹药的远程
-					if(backupTroops.get(TroopType.REMOTE_NO_AMMO).size() > 0){
-						index = this.getBackupTroopsByType(TroopType.REMOTE_NO_AMMO).size()-1;
-						this.getBackupTroopsByType(TroopType.REMOTE_NO_AMMO).remove(index);
-					}
-				}
-			}
-			break;
-		case FIELD_SUPPORT:
-		case FIELD_BACKUP:
-			break;
-		default:
-			throw new RuntimeException("unkown BattleFieldType: " + position.getType());
-		}
-	}
-	
-	/**
 	 * 判断指定战场位置是否还有后备作战单位
 	 * 
 	 * @param position
 	 * @return
 	 */
-	boolean hasNextUnit(BattleFieldType position) {
+	boolean hasNextUnit(BattleFieldType position, Slot slot) {
+		if(slot.isFull())
+			return false;
 		switch(position){
 		case FIELD_FIRE:
-			if(backupTroops.get(TroopType.FIRE).size() > 0){
-				return true;
+			if(this.getBackupBattleTroopsByType(TroopType.FIRE).size() > 0){
+				if(slot.isEmpty()){
+					return true;
+				}else{
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FIRE)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()){
+							return true;
+						}
+					}
+				}
 			}
 			return false;
 		case FIELD_FLY_FIRE:
-			if(backupTroops.get(TroopType.FLY_FIRE).size() > 0){
-				return true;
+			if(this.getBackupBattleTroopsByType(TroopType.FLY_FIRE).size() > 0){
+				if(slot.isEmpty()){
+					return true;
+				}else{
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()){
+							return true;
+						}
+					}
+				}
 			}
 			return false;
 		case FIELD_REMOTE:
-			if(backupTroops.get(TroopType.REMOTE).size() > 0){
-				return true;
+			if(this.getBackupBattleTroopsByType(TroopType.REMOTE).size() > 0){
+				if(slot.isEmpty()){
+					return true;
+				}else{
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.REMOTE)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()){
+							return true;
+						}
+					}
+				}
 			}
 			return false;
 		case FIELD_CLOSE:
-			if(backupTroops.get(TroopType.WEIGHT).size() > 0){
-				return true;
-			}else{
-				if(backupTroops.get(TroopType.LIGHT).size() > 0){
+			if(this.getBackupBattleTroopsByType(TroopType.WEIGHT).size() > 0){
+				if(slot.isEmpty()){
 					return true;
 				}else{
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.WEIGHT)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()){
+							return true;
+						}
+					}
+				}
+			}else{
+				if(this.getBackupBattleTroopsByType(TroopType.LIGHT).size() > 0){
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.LIGHT)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()){
+							return true;
+						}
+					}
+				}else{
 					//没有弹药的远程
-					if(backupTroops.get(TroopType.REMOTE_NO_AMMO).size() > 0){
-						return true;
+					if(this.getBackupBattleTroopsByType(TroopType.REMOTE_NO_AMMO).size() > 0){
+						for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.REMOTE_NO_AMMO)){
+							if(bt.getResTroop().getId() == slot.getResTroopId()){
+								return true;
+							}
+						}
 					}
 				}
 			}
 			return false;
 		case FIELD_SIDE:
-			if(backupTroops.get(TroopType.LIGHT).size() > 0){
-				return true;
+			if(this.getBackupBattleTroopsByType(TroopType.LIGHT).size() > 0){
+				if(slot.isEmpty()){
+					return true;
+				}else{
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.LIGHT)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()){
+							return true;
+						}
+					}
+				}
 			}
 			return false;
 		case FIELD_FLY:
-			if(backupTroops.get(TroopType.FLY_AIR).size() > 0){
-				return true;
+			if( this.getBackupBattleTroopsByType(TroopType.FLY_AIR).size() > 0){
+				if(slot.isEmpty()){
+					return true;
+				}else{
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_AIR)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()){
+							return true;
+						}
+					}
+				}
 			}
 			return false;
 		case FIELD_SUPPORT:
@@ -340,67 +271,244 @@ public class Army implements Serializable{
 			throw new RuntimeException("unkown BattleFieldType: " + position);
 		}
 	}
-	
-	
-	BattleUnit getNextUnit(BattleFieldType position) {
-		List<BattleUnit> backups = null;
+
+	BattleUnit getNextUnit(BattleFieldType position, Slot slot) {
+		List<BattleTroop> backups = null;
 		BattleUnit nextUnit = null;
+		int count;
+		if(!this.hasNextUnit(position, slot) || slot.isFull())
+			return nextUnit;
+		
 		switch(position){
 		case FIELD_FLY_FIRE:
-			backups = backupTroops.get(TroopType.FLY_FIRE);
+			backups = this.getBackupBattleTroopsByType(TroopType.FLY_FIRE);
 			Collections.sort(backups, FlyComparator.INSTANCE);
 			if(backups.size() > 0){
-				nextUnit = backups.get(backups.size()-1);
-				return nextUnit;
+				if(slot.isEmpty()){
+					BattleTroop temp = backups.get(backups.size()-1);
+					count = slot.getFreeSpace()/temp.getResTroop().getSpace();
+					count = Math.min(count, temp.getCount());
+					temp.setCount(temp.getCount() - count);
+					if(temp.getCount() == 0)
+						backups.remove(temp);
+					
+					nextUnit = new FlyFireBattleUnit(temp, count);
+					return nextUnit;
+				}else{
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()
+								&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
+							count = Math.min(count, bt.getCount());
+							bt.setCount(bt.getCount() - count);
+							if(bt.getCount() == 0)
+								backups.remove(bt);
+
+							nextUnit = new FlyFireBattleUnit(bt, count);
+							return nextUnit;
+						}
+					}
+				}
 			}
 			return null;
 		case FIELD_REMOTE:
-			backups = backupTroops.get(TroopType.REMOTE);
+			backups = this.getBackupBattleTroopsByType(TroopType.REMOTE);
 			Collections.sort(backups, Attack2Comparator.INSTANCE);
 			if(backups.size() > 0){
-				nextUnit = backups.get(backups.size()-1);
-				return nextUnit;
+				if(slot.isEmpty()){
+					BattleTroop temp = backups.get(backups.size()-1);
+					count = slot.getFreeSpace()/temp.getResTroop().getSpace();
+					count = Math.min(count, temp.getCount());
+					temp.setCount(temp.getCount() - count);
+					if(temp.getCount() == 0)
+						backups.remove(temp);
+					
+					nextUnit = new RemoteBattleUnit(temp, count);
+					return nextUnit;
+				}else{
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()
+								&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
+							count = Math.min(count, bt.getCount());
+							bt.setCount(bt.getCount() - count);
+							if(bt.getCount() == 0)
+								backups.remove(bt);
+
+							nextUnit = new RemoteBattleUnit(bt, count);
+							return nextUnit;
+						}
+					}
+				}
 			}
 			return null;
 		case FIELD_SIDE:
-			backups = backupTroops.get(TroopType.LIGHT);
+			backups = this.getBackupBattleTroopsByType(TroopType.LIGHT);
 			Collections.sort(backups, AttackComparator.INSTANCE);
 			if(backups.size() > 0){
-				nextUnit = backups.get(backups.size()-1);
-				return nextUnit;
+				if(slot.isEmpty()){
+					BattleTroop temp = backups.get(backups.size()-1);
+					count = slot.getFreeSpace()/temp.getResTroop().getSpace();
+					count = Math.min(count, temp.getCount());
+					temp.setCount(temp.getCount() - count);
+					if(temp.getCount() == 0)
+						backups.remove(temp);
+					
+					nextUnit = new LightBattleUnit(temp, count);
+					return nextUnit;
+				}else{
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()
+								&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
+							count = Math.min(count, bt.getCount());
+							bt.setCount(bt.getCount() - count);
+							if(bt.getCount() == 0)
+								backups.remove(bt);
+
+							nextUnit = new LightBattleUnit(bt, count);
+							return nextUnit;
+						}
+					}
+				}
 			}
 			return null;
 		case FIELD_FLY:
-			backups = backupTroops.get(TroopType.FLY_AIR);
+			backups = this.getBackupBattleTroopsByType(TroopType.FLY_AIR);
 			Collections.sort(backups, FlyComparator.INSTANCE);
 			if(backups.size() > 0){
-				nextUnit = backups.get(backups.size()-1);
-				return nextUnit;
+				if(slot.isEmpty()){
+					BattleTroop temp = backups.get(backups.size()-1);
+					count = slot.getFreeSpace()/temp.getResTroop().getSpace();
+					count = Math.min(count, temp.getCount());
+					temp.setCount(temp.getCount() - count);
+					if(temp.getCount() == 0)
+						backups.remove(temp);
+					
+					nextUnit = new FlyAirBattleUnit(temp, count);
+					return nextUnit;
+				}else{
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()
+								&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
+							count = Math.min(count, bt.getCount());
+							bt.setCount(bt.getCount() - count);
+							if(bt.getCount() == 0)
+								backups.remove(bt);
+
+							nextUnit = new FlyAirBattleUnit(bt, count);
+							return nextUnit;
+						}
+					}
+				}
 			}
 			return null;
 		case FIELD_FIRE:
-			backups = backupTroops.get(TroopType.FIRE);
+			backups = this.getBackupBattleTroopsByType(TroopType.FIRE);
 			Collections.sort(backups, FireComparator.INSTANCE);
 			if(backups.size() > 0){
-				nextUnit = backups.get(backups.size()-1);
-				return nextUnit;
+				if(slot.isEmpty()){
+					BattleTroop temp = backups.get(backups.size()-1);
+					count = slot.getFreeSpace()/temp.getResTroop().getSpace();
+					count = Math.min(count, temp.getCount());
+					temp.setCount(temp.getCount() - count);
+					if(temp.getCount() == 0)
+						backups.remove(temp);
+					
+					nextUnit = new FireBattleUnit(temp, count);
+					return nextUnit;
+				}else{
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()
+								&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
+							count = Math.min(count, bt.getCount());
+							bt.setCount(bt.getCount() - count);
+							if(bt.getCount() == 0)
+								backups.remove(bt);
+
+							nextUnit = new FireBattleUnit(bt, count);
+							return nextUnit;
+						}
+					}
+				}
 			}
 			return null;
 		case FIELD_CLOSE:
-			backups = backupTroops.get(TroopType.WEIGHT);
+			backups = this.getBackupBattleTroopsByType(TroopType.WEIGHT);
 			if(backups.size() > 0){
-				nextUnit = backups.get(backups.size()-1);
-				return nextUnit;
-			}else{
-				backups = backupTroops.get(TroopType.LIGHT);
-				if(backups.size() > 0){
-					nextUnit = backups.get(backups.size()-1);
+				if(slot.isEmpty()){
+					BattleTroop temp = backups.get(backups.size()-1);
+					count = slot.getFreeSpace()/temp.getResTroop().getSpace();
+					count = Math.min(count, temp.getCount());
+					temp.setCount(temp.getCount() - count);
+					if(temp.getCount() == 0)
+						backups.remove(temp);
+					
+					nextUnit = new WeightBattleUnit(temp, count);
 					return nextUnit;
 				}else{
-					backups = backupTroops.get(TroopType.REMOTE_NO_AMMO);//没有弹药的远程
-					if(backups.size() > 0){
-						nextUnit = backups.get(backups.size()-1);
+					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
+						if(bt.getResTroop().getId() == slot.getResTroopId()
+								&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
+							count = Math.min(count, bt.getCount());
+							bt.setCount(bt.getCount() - count);
+							if(bt.getCount() == 0)
+								backups.remove(bt);
+
+							nextUnit = new WeightBattleUnit(bt, count);
+							return nextUnit;
+						}
+					}
+				}
+			}else{
+				backups = this.getBackupBattleTroopsByType(TroopType.LIGHT);
+				if(backups.size() > 0){
+					if(slot.isEmpty()){
+						BattleTroop temp = backups.get(backups.size()-1);
+						count = slot.getFreeSpace()/temp.getResTroop().getSpace();
+						count = Math.min(count, temp.getCount());
+						temp.setCount(temp.getCount() - count);
+						if(temp.getCount() == 0)
+							backups.remove(temp);
+						
+						nextUnit = new LightBattleUnit(temp, count);
 						return nextUnit;
+					}else{
+						for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
+							if(bt.getResTroop().getId() == slot.getResTroopId()
+									&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
+								count = Math.min(count, bt.getCount());
+								bt.setCount(bt.getCount() - count);
+								if(bt.getCount() == 0)
+									backups.remove(bt);
+								
+								nextUnit = new LightBattleUnit(bt, count);
+								return nextUnit;
+							}
+						}
+					}
+				}else{
+					backups = this.getBackupBattleTroopsByType(TroopType.REMOTE_NO_AMMO);//没有弹药的远程
+					if(slot.isEmpty()){
+						BattleTroop temp = backups.get(backups.size()-1);
+						count = slot.getFreeSpace()/temp.getResTroop().getSpace();
+						count = Math.min(count, temp.getCount());
+						temp.setCount(temp.getCount() - count);
+						if(temp.getCount() == 0)
+							backups.remove(temp);
+						
+						nextUnit = new RemoteBattleUnit(temp, count);
+						return nextUnit;
+					}else{
+						for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
+							if(bt.getResTroop().getId() == slot.getResTroopId()
+									&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
+								count = Math.min(count, bt.getCount());
+								bt.setCount(bt.getCount() - count);
+								if(bt.getCount() == 0)
+									backups.remove(bt);
+								
+								nextUnit = new RemoteBattleUnit(bt, count);
+								return nextUnit;
+							}
+						}
 					}
 				}
 			}
@@ -411,37 +519,46 @@ public class Army implements Serializable{
 		default:
 			throw new RuntimeException("unkown BattleFieldType: " + position);
 		}
+	}
+
+	void addAUnit(TroopType troopType, BattleUnit bu){
+		List<BattleTroop> troops = this.getBackupBattleTroopsByType(troopType);
+		for(BattleTroop bt : troops){
+			if(bt.getResTroop().getId() == bu.getTroopId()){
+				bt.setCount(bt.getCount() + bu.getCount());
+				return;
+			}
+		}
+		
+		BattleTroop temp = new BattleTroop();
+		temp.setCount(bu.getCount());
+		ResTroop.Builder res = configLogic.getResTroop(bu.getTroopId()).toBuilder();
+		res.setAttack(bu.getAttack()).setAttack2(bu.getAttack2()).setDefense(bu.getDefense());
+		temp.setResTroop(res.build());
+		
+		troops.add(temp);
 	}
 
 	@Override
 	public String toString() {
-		return "Army [playerId=" + playerId + ", cityId=" + cityId + ", backupTroops=" + backupTroops
-				+ "]";
+		return "Army [playerId=" + playerId + ", cityId=" + cityId + ", backupBattleTroops=" + backupBattleTroops + "]";
 	}
 
-	public List<Troop> convertToTroops() {
-		Map<Integer,Troop> troops = new HashMap<>();
-		for(List<BattleUnit> units : this.backupTroops.values()){
-			for(BattleUnit unit : units){
-				Troop temp = troops.get(unit.getTroopId());
-				if(temp == null){
-					Troop.Builder builder = Troop.newBuilder();
+	public List<GameProtos.Troop> convertToTroops() {
+		List<GameProtos.Troop> troops = new ArrayList<>();
+		for(List<BattleTroop> list : this.backupBattleTroops.values()){
+			for(BattleTroop bt : list){
+				GameProtos.Troop.Builder builder = GameProtos.Troop.newBuilder();
+				builder.setTroopResId(bt.getResTroop().getId());
+				builder.setCount(bt.getCount());
+				builder.setAttack(bt.getResTroop().getAttack());
+				builder.setAttack2(bt.getResTroop().getAttack2());
+				builder.setDefense(bt.getResTroop().getDefense());
 				
-					builder.setAttack(unit.getAttack());
-					builder.setAttack2(unit.getAttack2());
-					builder.setCount(1);
-					builder.setDefense(unit.getDefense());
-					builder.setTroopResId(unit.getTroopId());
-					temp = builder.build();
-				}else{
-					Troop.Builder builder = temp.toBuilder();
-					builder.setCount(temp.getCount()+1);
-					temp = builder.build();
-				}
-				troops.put(temp.getTroopResId(), temp);
+				troops.add(builder.build());
 			}
 		}
-		return new ArrayList<Troop>(troops.values());
+		return troops;
 	}
 
 }

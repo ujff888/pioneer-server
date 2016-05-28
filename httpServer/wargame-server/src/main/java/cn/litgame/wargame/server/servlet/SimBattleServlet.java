@@ -16,10 +16,10 @@ import org.springframework.web.servlet.ModelAndView;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleGround;
 import cn.litgame.wargame.core.logic.BattleLogic;
 import cn.litgame.wargame.core.logic.ConfigLogic;
-import cn.litgame.wargame.core.model.BattleTroop;
 import cn.litgame.wargame.core.model.battle.Army;
 import cn.litgame.wargame.core.model.battle.BattleField;
 import cn.litgame.wargame.core.model.battle.BattleRound;
+import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
 import junit.framework.Assert;
 
 @Controller

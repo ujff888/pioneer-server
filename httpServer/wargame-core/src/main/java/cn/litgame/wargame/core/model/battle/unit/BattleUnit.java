@@ -1,22 +1,29 @@
 package cn.litgame.wargame.core.model.battle.unit;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
-import cn.litgame.wargame.core.model.BattleTroop;
+import cn.litgame.wargame.core.auto.GameResProtos.ResTroop;
 import cn.litgame.wargame.core.model.Building;
 import cn.litgame.wargame.core.model.battle.Army;
 import cn.litgame.wargame.core.model.battle.Damage;
 import cn.litgame.wargame.core.model.battle.FieldPosition;
 import cn.litgame.wargame.core.model.battle.Slot;
+import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
 
 /**
  * 细化的作战单位，是所有具体作战单位的基类
- * 
+ * TODO：1.这个是具体的作战单位，为什么还要存cityId和playerId，这样不是重复的好多么，1万个单位就1万个cityId
+ * 		这两个值抽出来，放到他的父级对象上，军队的对象上有这2个值就够了
+ * 2.这里做个优化的工作，因为如果一场战斗里如果参战部队是10000，那么双方的部队加起来就是20000，也就是说，一场战斗就要实例化2万个对象
+ * 	如果服务器里正在进行100场战斗，那就是200万个对象，这一个对象里至少15个int，15 * 4 = 60 ，60byte * 200万 = 120，000，000byte,也就是说120m。内存消耗太大了，要是1000场战斗，那就是1G的内存占用
+ * 解决方案为：战斗中，每个格子只能上场一种单位，每个格子把士兵的血量、弹药 * 数量，当作一个整体来看，然后根据血量掉的百分比，决定死多少人，填充人数的时候，也按照百分比的方式加入到当前的格子内。
+ * 同理，按照这个算法的话，那么城墙也就只能是按照格子去计算了，不能按照一个整体去计算了
  * @author 熊纪元
  *
  */
@@ -25,6 +32,7 @@ public abstract class BattleUnit implements Serializable{
 	
 	private static final Logger log = Logger.getLogger(BattleUnit.class);
 	protected final int originalAmount;
+	protected final int originalHp;
 	
 	protected FieldPosition position;
 	protected Slot slot;
@@ -46,19 +54,26 @@ public abstract class BattleUnit implements Serializable{
 		this.playerId = fort.getPlayerId();
 		this.cityId = fort.getCityId();
 		this.originalAmount = 0;
+		this.originalHp = 0;
 	}
 	
-	public BattleUnit(BattleTroop bt) {
+	public BattleUnit(BattleTroop bt, int count, long playerId, int cityId) {
 		this.troopId = bt.getResTroop().getId();
-		this.attack = bt.getResTroop().getAttack();
 		this.percent = bt.getResTroop().getPercent();
-		this.attack2 = bt.getResTroop().getAttack2();
 		this.percent2 = bt.getResTroop().getPercent2();
+		
 		this.amount = bt.getResTroop().getAmount();
-		this.hp = bt.getResTroop().getHp();
-		this.defense = bt.getResTroop().getDefense();
-		this.space = bt.getResTroop().getSpace();
+		this.attack = count*bt.getResTroop().getAttack();
+		this.attack2 = count*bt.getResTroop().getAttack2();
+		this.hp = count*bt.getResTroop().getHp();
+		this.defense = count*bt.getResTroop().getDefense();
+		this.space = count*bt.getResTroop().getSpace();
+
 		this.originalAmount = bt.getResTroop().getAmount();
+		this.originalHp = bt.getResTroop().getHp();
+		
+		this.playerId = playerId;
+		this.cityId = cityId;
 	}
 	
 	public long getPlayerId() {
@@ -163,6 +178,13 @@ public abstract class BattleUnit implements Serializable{
 		return this.space;
 	}
 
+	public int getOriginalAmount() {
+		return originalAmount;
+	}
+	public int getOriginalHp() {
+		return originalHp;
+	}
+
 	public boolean isFrom(Army army){
 		return (this.playerId == army.getPlayerId() && this.cityId == army.getCityId());
 	}
@@ -209,6 +231,10 @@ public abstract class BattleUnit implements Serializable{
 			int initCount = targetCount;
 			int initDamage = totalDamage;
 			for(BattleFieldType type : attackOrder){
+				if(enemy.get(type) == null){
+					enemy.put(type, new ArrayList<>());
+					break;
+				}
 				int size = enemy.get(type).size();
 				if(size >= targetCount){
 					if((enemy.get(type).get(0).isFortificationUnit()) && !(this.isFireUnit())){
@@ -237,13 +263,13 @@ public abstract class BattleUnit implements Serializable{
 				break;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
-		return "BattleUnit [position=" + position + ", slot=" + slot + ", playerId=" + playerId + ", cityId=" + cityId
-				+ ", troopId=" + troopId + ", attack=" + attack + ", percent=" + percent + ", attack2=" + attack2
-				+ ", percent2=" + percent2 + ", amount=" + amount + ", hp=" + hp + ", defense=" + defense + ", space="
-				+ space + "]";
+		return "BattleUnit [originalAmount=" + originalAmount + ", position=" + position + ", slot=" + slot
+				+ ", playerId=" + playerId + ", cityId=" + cityId + ", troopId=" + troopId + ", attack=" + attack
+				+ ", percent=" + percent + ", attack2=" + attack2 + ", percent2=" + percent2 + ", amount=" + amount
+				+ ", hp=" + hp + ", defense=" + defense + ", space=" + space + "]";
 	}
 
 	/**
@@ -266,5 +292,25 @@ public abstract class BattleUnit implements Serializable{
 		else{
 			return (double)amount/originalAmount;
 		}
+	}
+
+	public void takeDamage(int ad) {
+		if(ad > this.defense)
+			hp -= ad < hp ? ad : hp;
+	}
+	
+	public int getCount() {
+		return (hp+originalHp)/originalHp -1;
+	}
+
+	public BattleUnit add(BattleUnit bu) {
+		this.amount = (amount*getCount() + bu.getAmount()*bu.getCount())/(getCount() + bu.getCount());
+		this.attack += bu.getAttack();
+		this.attack2 += bu.getAttack2();
+		this.hp += bu.getHp();
+		this.defense += bu.getDefense();
+		this.space += bu.getSpace();
+		
+		return this;
 	}
 }

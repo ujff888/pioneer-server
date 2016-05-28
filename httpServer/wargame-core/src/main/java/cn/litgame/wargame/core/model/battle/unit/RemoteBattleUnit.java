@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
-import cn.litgame.wargame.core.model.BattleTroop;
 import cn.litgame.wargame.core.model.battle.Damage;
+import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
 
 /**
  * 远程部队
@@ -25,8 +25,8 @@ public class RemoteBattleUnit extends BattleUnit {
 			BattleFieldType.FIELD_SIDE
 	};
 	
-	public RemoteBattleUnit(BattleTroop bt) {
-		super(bt);
+	public RemoteBattleUnit(BattleTroop bt, int count, long playerId, int cityId) {
+		super(bt, count, playerId, cityId);
 	}
 
 	@Override

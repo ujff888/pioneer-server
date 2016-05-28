@@ -105,6 +105,7 @@ public class PlayerLogic {
 	 * @return
 	 */
 	public MessageCode changeSystem(Player player,int targetSystemId,SCChangeSystem.Builder builder){
+		
 		ResSystem resSystem = configLogic.getResSystem(targetSystemId);
 		PlayerTech pt = this.getPlayerTech(player.getPlayerId());
 		PlayerState ps = this.getPlayerState(player.getPlayerId());

@@ -26,7 +26,7 @@ public class FieldPosition implements Serializable{
 		this.count = count;
 		slots = new ArrayList<>(count);
 		for(int i=0;i<count;i++){
-			slots.add(new Slot());
+			slots.add(new Slot(capacity));
 		}
 	}
 

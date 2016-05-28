@@ -24,9 +24,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import cn.litgame.wargame.core.auto.GameResProtos.BattleGround;
-import cn.litgame.wargame.core.model.BattleTroop;
 import cn.litgame.wargame.core.model.battle.Army;
 import cn.litgame.wargame.core.model.battle.BattleField;
+import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
 import cn.litgame.wargame.core.model.battle.unit.BattleUnit;
 import cn.litgame.wargame.core.model.battle.unit.FlyFireBattleUnit;
 import junit.framework.Assert;
@@ -144,4 +144,42 @@ public class BattleLogicTest {
 		Assert.assertEquals(BattleField.RESULT_EVEN, result);
 	}
 	
+
+	public static void main(String[] args){
+		List<Entry> strs = new ArrayList<>();
+		strs.add(new Entry(1,"hello"));
+		strs.add(new Entry(2,"world"));
+		
+		Entry temp = strs.get(0);
+		temp.i = 111;
+		temp.value = "new value";
+		System.out.println(strs);
+		System.out.println(strs.indexOf(temp));
+		
+		for(Entry e : strs){
+			if(e.i == 111){
+				e.value = "value-alt";
+			}
+		}
+		System.out.println(strs);
+		
+		strs.remove(temp);
+		System.out.println(strs.indexOf(temp));
+		System.out.println(strs);
+		
+		
+	}
 }
+class Entry{
+	int i;
+	String value;
+	
+	public Entry(int i, String v){
+		this.i = i;
+		this.value = v;
+	}
+	public String toString(){
+		return i + "," + value;
+	}
+}
+

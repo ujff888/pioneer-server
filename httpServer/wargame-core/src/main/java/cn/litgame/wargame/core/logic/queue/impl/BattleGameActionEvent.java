@@ -16,11 +16,11 @@ import cn.litgame.wargame.core.auto.GameResProtos.ResTroop;
 import cn.litgame.wargame.core.logic.BattleLogic;
 import cn.litgame.wargame.core.logic.ConfigLogic;
 import cn.litgame.wargame.core.logic.queue.GameActionEvent;
-import cn.litgame.wargame.core.model.BattleTroop;
 import cn.litgame.wargame.core.model.GameAction;
 import cn.litgame.wargame.core.model.Troop;
 import cn.litgame.wargame.core.model.battle.Army;
 import cn.litgame.wargame.core.model.battle.BattleField;
+import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
 
 @Service
 public class BattleGameActionEvent extends GameActionEvent {

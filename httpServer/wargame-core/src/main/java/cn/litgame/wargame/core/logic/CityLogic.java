@@ -70,6 +70,7 @@ public class CityLogic {
 	private RankLogic rankLogic;
 
 	public int getFreePerson(City myCity) {
+
 		return (int) (myCity.getTotalPerson() - myCity.getWoodWorker()
 				- myCity.getResourceWorker() - myCity.getScientist());
 	}

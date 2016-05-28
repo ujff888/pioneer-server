@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.apache.http.impl.io.ContentLengthOutputStream;
@@ -49,6 +50,11 @@ import redis.clients.jedis.Jedis;
  *
  */
 public class BattleField implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1011195645618729863L;
+
 	@Resource(name = "buildingLogic")
 	private static BuildingLogic buildingLogic;
 	
@@ -58,7 +64,9 @@ public class BattleField implements Serializable {
 	@Resource(name = "playerLogic")
 	private static PlayerLogic playerLogic;
 	
-	private static final long serialVersionUID = 5157965316456907711L;
+	
+	private static final Slot largeSlot = new Slot(Integer.MAX_VALUE);
+	
 	public final static int RESULT_FIGHTING = 0;
 	public final static int RESULT_OFFENCE_VICTORY = 1;
 	public final static int RESULT_DEFENCE_VICTORY = 2;
@@ -151,22 +159,22 @@ public class BattleField implements Serializable {
 		fieldPositionsForDefence.put(BattleFieldType.FIELD_SIDE, new FieldPosition(BattleFieldType.FIELD_SIDE, battleGround.getLight(), battleGround.getLightCount()));
 		fieldPositionsForDefence.put(BattleFieldType.FIELD_SUPPORT, new FieldPosition(BattleFieldType.FIELD_SUPPORT, Integer.MAX_VALUE, 1));
 		
-		troopsInFieldOffence.put(BattleFieldType.FIELD_CLOSE, new ArrayList<BattleUnit>());
-		troopsInFieldOffence.put(BattleFieldType.FIELD_REMOTE, new ArrayList<BattleUnit>());
-		troopsInFieldOffence.put(BattleFieldType.FIELD_FIRE, new ArrayList<BattleUnit>());
-		troopsInFieldOffence.put(BattleFieldType.FIELD_SIDE, new ArrayList<BattleUnit>());
-		troopsInFieldOffence.put(BattleFieldType.FIELD_FLY, new ArrayList<BattleUnit>());
-		troopsInFieldOffence.put(BattleFieldType.FIELD_FLY_FIRE, new ArrayList<BattleUnit>());
-		troopsInFieldOffence.put(BattleFieldType.FIELD_SUPPORT, new ArrayList<BattleUnit>());
 		
-		troopsInFieldDefence.put(BattleFieldType.FIELD_CLOSE, new ArrayList<BattleUnit>());
-		troopsInFieldDefence.put(BattleFieldType.FIELD_REMOTE, new ArrayList<BattleUnit>());
-		troopsInFieldDefence.put(BattleFieldType.FIELD_FIRE, new ArrayList<BattleUnit>());
-		troopsInFieldDefence.put(BattleFieldType.FIELD_SIDE, new ArrayList<BattleUnit>());
-		troopsInFieldDefence.put(BattleFieldType.FIELD_FLY, new ArrayList<BattleUnit>());
-		troopsInFieldDefence.put(BattleFieldType.FIELD_FLY_FIRE, new ArrayList<BattleUnit>());
-		troopsInFieldDefence.put(BattleFieldType.FIELD_SUPPORT, new ArrayList<BattleUnit>());
+		//TODO：这里使用惰性初始化的方式，参照
+		//		Map<String ,List> data = new hashMap();
+		//		list a = data.get(string)
+		//		if(a == null){
+		//			a = new list
+		//			data.put(string,a)
+		//		}
+		//		a.add("*****")
+		//
+
 		
+	}
+	
+	@PostConstruct
+	public void init(){
 		if(this.isLand){
 			//守方自带城墙
 			List<Building> forts = buildingLogic.getBuildings(fieldCityId, 1011);
@@ -275,11 +283,21 @@ public class BattleField implements Serializable {
 	}
 
 	public List<BattleUnit> getTroopsInFieldOffenceByPosition(BattleFieldType type) {
-		return troopsInFieldOffence.get(type);
+		List<BattleUnit> result = troopsInFieldOffence.get(type);
+		if(result == null){
+			result = new ArrayList<>();
+			troopsInFieldOffence.put(type, result);
+		}
+		return result;
 	}
 	
 	public List<BattleUnit> getTroopsInFieldDefenceByPosition(BattleFieldType type) {
-		return troopsInFieldDefence.get(type);
+		List<BattleUnit> result = troopsInFieldDefence.get(type);
+		if(result == null){
+			result = new ArrayList<>();
+			troopsInFieldDefence.put(type, result);
+		}
+		return result;
 	}
 	
 	public List<Army> getArmysOffence() {
@@ -298,7 +316,6 @@ public class BattleField implements Serializable {
 		this.armysDefence = armysDefence;
 	}
 
-	//warning:不能在遍历时改变对象集合
 	public void addOffence(Army army){
 		this.armysOffence.add(army);
 	}
@@ -396,8 +413,8 @@ public class BattleField implements Serializable {
 		if(remain != 0)
 			return false;
 		
-		return (!hasNextUnit(armysDefence, BattleFieldType.FIELD_CLOSE) &&
-					!hasNextUnit(armysDefence, BattleFieldType.FIELD_REMOTE));
+		return (!hasNextUnit(armysDefence, BattleFieldType.FIELD_CLOSE, largeSlot) &&
+					!hasNextUnit(armysDefence, BattleFieldType.FIELD_REMOTE, largeSlot));
 	}
 
 	private boolean isOffenceDefeated() {
@@ -409,8 +426,8 @@ public class BattleField implements Serializable {
 		if(remain != 0)
 			return false;
 		
-		return (!hasNextUnit(armysOffence, BattleFieldType.FIELD_CLOSE) &&
-					!hasNextUnit(armysOffence, BattleFieldType.FIELD_REMOTE));
+		return (!hasNextUnit(armysOffence, BattleFieldType.FIELD_CLOSE, largeSlot) &&
+					!hasNextUnit(armysOffence, BattleFieldType.FIELD_REMOTE, largeSlot));
 	}
 
 	public void nextRound(){
@@ -595,28 +612,41 @@ public class BattleField implements Serializable {
 		
 		for(FieldPosition position : fieldPositionsForOffence.values()){
 			for(Slot slot : position.getSlots()){
-				int capacity = position.getCapacity();
-				int free = capacity - slot.getSize();
 				BattleFieldType type = position.getType();
-				for(BattleUnit bu=null;
-						slot.getSize() < capacity &&
-						hasNextUnit(armysOffence, type) &&
-						(bu = getNextUnit(armysOffence, type)).getSpace()<=free;
-						free=capacity-slot.getSize()){
-					if((type == BattleFieldType.FIELD_FLY_FIRE || 
-							type == BattleFieldType.FIELD_FLY) &&
-							bu.getAmount() <= 0){
-						break;
-					}
-					pushAUnitToFieldOffence(bu, position, slot);
-					getArmy(bu, true).popAUnitFromBackup(position);
+				BattleUnit bunit = null;
+				if(hasNextUnit(armysOffence, type, slot)){
+					bunit = getNextUnit(armysOffence, type, slot);
+					if(bunit != null)
+						pushAUnitToFieldOffence(bunit, position, slot);
 				}
 			}
 		}
 	}
 	
+	private boolean hasNextUnit(List<Army> armys, BattleFieldType type, Slot slot) {
+		for(Army a : armys) {
+			if(a.hasNextUnit(type, slot))
+				return true;
+		}
+		return false;
+	}
+	
 	private void pushAUnitToFieldOffence(BattleUnit bu, FieldPosition position, Slot slot) {
 		bu.comeToField(position, slot);
+		List<BattleUnit> units = this.getTroopsInFieldOffenceByPosition(position.getType());
+		if(units == null){
+			units = new ArrayList<>();
+			units.add(bu);
+			this.getTroopsInFieldOffence().put(position.getType(), units);
+			return;
+		}
+		for(BattleUnit unit : units){
+			if(unit.getTroopId() == bu.getTroopId() && unit.getSlot() == bu.getSlot()){
+				unit = unit.add(bu);
+				return;
+			}
+		}
+		
 		this.getTroopsInFieldOffenceByPosition(position.getType()).add(bu);
 	}
 	
@@ -624,26 +654,17 @@ public class BattleField implements Serializable {
 		for(FieldPosition position : fieldPositionsForDefence.values()){
 			if(position.getType() == BattleFieldType.FIELD_CLOSE
 					&& getTroopsInFieldDefenceByPosition(BattleFieldType.FIELD_CLOSE).size() != 0
-					&& getTroopsInFieldDefenceByPosition(BattleFieldType.FIELD_CLOSE).get(0) instanceof FortificationBattleUnit){
+					&& getTroopsInFieldDefenceByPosition(BattleFieldType.FIELD_CLOSE).get(0).isFortificationUnit()){
 				
 				continue;
 			}
 			for(Slot slot : position.getSlots()){
-				int capacity = position.getCapacity();
-				int free = capacity - slot.getSize();
 				BattleFieldType type = position.getType();
-				for(BattleUnit bu=null;
-						slot.getSize() < capacity &&
-						hasNextUnit(armysDefence, type) &&
-						(bu = getNextUnit(armysDefence, type)).getSpace()<=free;
-						free=capacity-slot.getSize()){
-					if((type == BattleFieldType.FIELD_FLY_FIRE || 
-							type == BattleFieldType.FIELD_FLY) &&
-							bu.getAmount() <= 0){
-						break;
-					}
-					pushAUnitToFieldDefence(bu, position, slot);
-					getArmy(bu, false).popAUnitFromBackup(position);
+				BattleUnit bunit = null;
+				if(hasNextUnit(armysDefence, type, slot)){
+					bunit = getNextUnit(armysDefence, type, slot);
+					if(bunit != null)
+						pushAUnitToFieldDefence(bunit, position, slot);
 				}
 			}
 		}
@@ -651,6 +672,20 @@ public class BattleField implements Serializable {
 	
 	private void pushAUnitToFieldDefence(BattleUnit bu, FieldPosition position, Slot slot) {
 		bu.comeToField(position, slot);
+		List<BattleUnit> units = this.getTroopsInFieldDefenceByPosition(position.getType());
+		if(units == null){
+			units = new ArrayList<>();
+			units.add(bu);
+			this.getTroopsInFieldDefence().put(position.getType(), units);
+			return;
+		}
+		for(BattleUnit unit : units){
+			if(unit.getTroopId() == bu.getTroopId() && unit.getSlot() == bu.getSlot()){
+				unit = unit.add(bu);
+				return;
+			}
+		}
+		
 		this.getTroopsInFieldDefenceByPosition(position.getType()).add(bu);
 	}
 
@@ -694,19 +729,16 @@ public class BattleField implements Serializable {
 		if(count>size)
 			damage.setUnitCount(size);
 		targets = targets.subList(0, damage.getUnitCount());
-		if(targets.size() > 0){
+		while(!damage.isEmpty() && damage.getUnitCount() > 0 && !targets.isEmpty()){
 			for(BattleUnit bu : targets){
-				if(!damage.isEmpty()){
-					int ad = damage.getAvgDamage();
-					int newHp = bu.getHp() - (ad > bu.getDefense() ? ad-bu.getDefense() : 0);
-					log.info("一个单位"+bu.getTroopId()+"受到"+(ad > bu.getDefense() ? ad-bu.getDefense() : 0)+"点伤害，生命值:"+newHp+" 类型"+bu.getPosition().getType());
-					bu.setHp(newHp);
-					damage.setDamageValue(damage.getDamageValue() - ad);
-					damage.setUnitCount(damage.getUnitCount() - 1);
-				}
+				int ad = damage.getAvgDamage();
+				bu.takeDamage(ad);
+				log.info("一个单位"+bu.getTroopId()+"受到"+(ad > bu.getDefense() ? ad-bu.getDefense() : 0)+"点伤害，生命值:"+bu.getHp()+" 类型"+bu.getPosition().getType());
+				damage.setDamageValue(damage.getDamageValue() - ad);
+				damage.setUnitCount(damage.getUnitCount() - 1);
 			}
-			removeZeroHpUnitFromField(type, isOffence);
 		}
+		removeZeroHpUnitFromField(type, isOffence);
 		
 	}
 	
@@ -718,29 +750,33 @@ public class BattleField implements Serializable {
 			itr = getTroopsInFieldDefenceByPosition(type).iterator();
 		while(itr.hasNext()){
 			BattleUnit bu = itr.next();
+			int lostNo = bu.getHp()/bu.getOriginalHp();
+			if(lostNo > 0){
+				for(int i=0; i<lostNo; i++){
+					BattleRoundInfo br = this.getBattleRound(bu.getPlayerId(), bu.getCityId(), isOffence);
+					if(br == null)
+						br = new BattleRoundInfo(bu.getPlayerId(), bu.getCityId());
+					RoundTroopInfo rti = br.getRoundTroopInfo(bu.getTroopId());
+					if(rti == null)
+						rti = new RoundTroopInfo(bu.getTroopId(), 0, 0);
+					rti.setLost(rti.getLost()+1);
+					br.putRoundTroopInfo(bu.getTroopId(), rti);
+					
+					this.putBattleRound1(bu.getPlayerId(), bu.getCityId(), br, isOffence);
+					
+					RoundTroopDetail rtd = this.getRoundTroopDetail(bu.getTroopId(), type, isOffence);
+					if(rtd == null)
+						rtd = new RoundTroopDetail(bu.getTroopId(), type, 0, 0, bu.getAmountRemain());
+					rtd.setLost(rtd.getLost()+1);
+					rtd.setAmountRemain(bu.getAmountRemain());
+					
+					this.putRoundTroopDetail(bu.getTroopId(), type, rtd, isOffence);
+				}
+			}
 			if(bu.getHp() <= 0){
 				itr.remove();
 				bu.getSlot().remove(bu);
 				log.info("一个单位退场" + bu.getTroopId() + "," + bu.getPosition().getType());
-				
-				BattleRoundInfo br = this.getBattleRound(bu.getPlayerId(), bu.getCityId(), isOffence);
-				if(br == null)
-					br = new BattleRoundInfo(bu.getPlayerId(), bu.getCityId());
-				RoundTroopInfo rti = br.getRoundTroopInfo(bu.getTroopId());
-				if(rti == null)
-					rti = new RoundTroopInfo(bu.getTroopId(), 0, 0);
-				rti.setLost(rti.getLost()+1);
-				br.putRoundTroopInfo(bu.getTroopId(), rti);
-				
-				this.putBattleRound1(bu.getPlayerId(), bu.getCityId(), br, isOffence);
-				
-				RoundTroopDetail rtd = this.getRoundTroopDetail(bu.getTroopId(), type, isOffence);
-				if(rtd == null)
-					rtd = new RoundTroopDetail(bu.getTroopId(), type, 0, 0, bu.getAmountRemain());
-				rtd.setLost(rtd.getLost()+1);
-				rtd.setAmountRemain(bu.getAmountRemain());
-				
-				this.putRoundTroopDetail(bu.getTroopId(), type, rtd, isOffence);
 			}
 		}
 	}
@@ -775,86 +811,36 @@ public class BattleField implements Serializable {
 	}
 	
 	private void reArange(boolean isOffence){
-		if(isOffence){
-			//将没有弹药的远程单位重新分配至后备部队
-			Iterator<BattleUnit> it = getTroopsInFieldOffenceByPosition(BattleFieldType.FIELD_REMOTE).iterator();
-			while(it.hasNext()){
-				BattleUnit bu = it.next();
-				if(bu.getAmount() <= 0){
-					it.remove();
-					getArmy(bu, isOffence).getBackupTroopsByType(TroopType.REMOTE_NO_AMMO).add(bu);
-					bu.getSlot().remove(bu);
-				}
-			}
-			//将没有弹药的轰炸单位直接移出战场
-			it = getTroopsInFieldOffenceByPosition(BattleFieldType.FIELD_FLY_FIRE).iterator();
-			while(it.hasNext()){
-				BattleUnit bu = it.next();
-				if(bu.getAmount() <= 0){
-					it.remove();
-					getArmy(bu, isOffence).getBackupTroopsByType(TroopType.FLY_FIRE).add(bu);
-					bu.getSlot().remove(bu);
-				}
-			}
-			//将没有弹药的空战单位直接移出战场
-			it = getTroopsInFieldOffenceByPosition(BattleFieldType.FIELD_FLY).iterator();
-			while(it.hasNext()){
-				BattleUnit bu = it.next();
-				if(bu.getAmount() <= 0){
-					it.remove();
-					getArmy(bu, isOffence).getBackupTroopsByType(TroopType.FLY_AIR).add(bu);
-					bu.getSlot().remove(bu);
-				}
-			}
-		}else{
-			Iterator<BattleUnit> it = getTroopsInFieldDefenceByPosition(BattleFieldType.FIELD_REMOTE).iterator();
-			while(it.hasNext()){
-				BattleUnit bu = it.next();
-				if(bu.getAmount() <= 0){
-					it.remove();
-					getArmy(bu, isOffence).getBackupTroopsByType(TroopType.REMOTE_NO_AMMO).add(bu);
-					bu.getSlot().remove(bu);
-				}
-			}
+		//将没有弹药的远程单位重新分配至后备部队
+		this.removeUnitOutofAmmo(BattleFieldType.FIELD_REMOTE, TroopType.REMOTE_NO_AMMO, isOffence);
 			
-			it = getTroopsInFieldDefenceByPosition(BattleFieldType.FIELD_FLY_FIRE).iterator();
-			while(it.hasNext()){
-				BattleUnit bu = it.next();
-				if(bu.getAmount() <= 0){
-					it.remove();
-					getArmy(bu, isOffence).getBackupTroopsByType(TroopType.FLY_FIRE).add(bu);
-					bu.getSlot().remove(bu);
-				}
-			}
+		//将没有弹药的轰炸单位直接移出战场
+		this.removeUnitOutofAmmo(BattleFieldType.FIELD_FLY_FIRE, TroopType.FLY_FIRE, isOffence);
 			
-			
-			it = getTroopsInFieldDefenceByPosition(BattleFieldType.FIELD_FLY).iterator();
-			while(it.hasNext()){
-				BattleUnit bu = it.next();
-				if(bu.getAmount() <= 0){
-					it.remove();
-					getArmy(bu, isOffence).getBackupTroopsByType(TroopType.FLY_AIR).add(bu);
-					bu.getSlot().remove(bu);
-				}
+		//将没有弹药的空战单位直接移出战场
+		this.removeUnitOutofAmmo(BattleFieldType.FIELD_FLY, TroopType.FLY_AIR, isOffence);
+	}
+	
+	private void removeUnitOutofAmmo(BattleFieldType fieldType, TroopType troopType, boolean isOffence){
+		Iterator<BattleUnit> it = getTroopsInFieldOffenceByPosition(fieldType).iterator();
+		while(it.hasNext()){
+			BattleUnit bu = it.next();
+			if(bu.getAmount() <= 0){
+				it.remove();
+				getArmy(bu, isOffence).addAUnit(troopType, bu);
+				bu.getSlot().remove(bu);
 			}
 		}
 	}
 	
-	private boolean hasNextUnit(List<Army> armys, BattleFieldType position){
+	private BattleUnit getNextUnit(List<Army> armys, BattleFieldType position, Slot slot){
 		for(Army army : armys){
-			if(army.hasNextUnit(position))
-				return true;
-		}
-		return false;
-	}
-	
-	private BattleUnit getNextUnit(List<Army> armys, BattleFieldType position){
-		for(Army army : armys){
-			if(army.hasNextUnit(position))
-				return army.getNextUnit(position);
+			if(army.hasNextUnit(position, slot))
+				return army.getNextUnit(position, slot);
 		}
 		return null;
 	}
+	
 	
 	public GameProtos.SimpleBattleInfo.Builder convertToSimpleBattleInfoBuilder() {
 		SimpleBattleInfo.Builder builder = SimpleBattleInfo.newBuilder();

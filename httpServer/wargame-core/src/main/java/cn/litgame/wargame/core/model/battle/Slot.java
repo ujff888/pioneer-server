@@ -11,8 +11,16 @@ import cn.litgame.wargame.core.model.battle.unit.BattleUnit;
  *
  */
 public class Slot implements Serializable{
+	public static final int EMPTY_TROOP_ID = -1;
+	
 	private static final long serialVersionUID = -3388682106941570858L;
 	private int size = 0;
+	private final int capacity;
+	private int resTroopId = EMPTY_TROOP_ID;
+	
+	public Slot(int capacity) {
+		this.capacity = capacity;
+	}
 	
 	public int getSize() {
 		return size;
@@ -20,17 +28,43 @@ public class Slot implements Serializable{
 	public void setSize(int size) {
 		this.size = size;
 	}
-
+	public int getCapacity() {
+		return capacity;
+	}
+	public int getResTroopId() {
+		return resTroopId;
+	}
+	public void setResTroopId(int resTroopId) {
+		this.resTroopId = resTroopId;
+	}
 	public void add(BattleUnit bu){
+		if(this.isEmpty()){
+			this.setResTroopId(bu.getTroopId());
+		}
 		this.size += bu.getSpace();
 	}
 	
 	public void remove(BattleUnit bu){
 		this.size -= bu.getSpace();
+		if(this.isEmpty()){
+			this.setResTroopId(EMPTY_TROOP_ID);
+		}
 	}
 	
+	public boolean isEmpty() {
+		return size <= 0;
+	}
+	
+	public boolean isFull() {
+		return size >= capacity;
+	}
+	
+	public int getFreeSpace() {
+		return capacity - size;
+	}
+
 	@Override
 	public String toString() {
-		return "Slot [size=" + size + "]";
+		return "Slot [size=" + size + ", capacity=" + capacity + ", resTroopId=" + resTroopId + "]";
 	}
 }
