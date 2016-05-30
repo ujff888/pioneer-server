@@ -1,9 +1,10 @@
 package cn.litgame.wargame.core.model.battle;
 
+import cn.litgame.wargame.core.auto.GameProtos;
+import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
+
 import java.io.Serializable;
 import java.util.ArrayList;
-
-import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
 
 /**
  * 阵地位置的抽象，包括格子的数目和容量
@@ -20,13 +21,15 @@ public class FieldPosition implements Serializable{
 	//一个位置包含若干个格子
 	private ArrayList<Slot> slots;
 
+	public FieldPosition() {}
+
 	public FieldPosition(BattleFieldType battleFieldType, int capacity, int count) {
 		this.type = battleFieldType;
 		this.capacity = capacity;
 		this.count = count;
 		slots = new ArrayList<>(count);
 		for(int i=0;i<count;i++){
-			slots.add(new Slot(capacity));
+			slots.add(new Slot(i, capacity));
 		}
 	}
 
@@ -34,26 +37,53 @@ public class FieldPosition implements Serializable{
 		return type;
 	}
 
+	public void setType(BattleFieldType type) {
+		this.type = type;
+	}
+
 	public int getCapacity() {
 		return capacity;
+	}
+
+	public void setCapacity(int capacity) {
+		this.capacity = capacity;
 	}
 
 	public int getCount() {
 		return count;
 	}
 
+	public void setCount(int count) {
+		this.count = count;
+	}
+
 	public ArrayList<Slot> getSlots() {
 		return slots;
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder sb =  new StringBuilder("FieldPosition [type=" + type + ", capacity=" + capacity + ", count=" + count + ", slots=[");
-		for(Slot s : slots){
-			sb.append("size: " + s.getSize() + " ");
-		}
-		sb.append("]]");
-		return sb.toString();
+	public void setSlots(ArrayList<Slot> slots) {
+		this.slots = slots;
 	}
 
+	@Override
+	public String toString() {
+		return "FieldPosition{" +
+				"type=" + type +
+				", capacity=" + capacity +
+				", count=" + count +
+				", slots=" + slots +
+				'}';
+	}
+
+	public GameProtos.FieldPosition convertToProto() {
+		GameProtos.FieldPosition.Builder builder = GameProtos.FieldPosition.newBuilder();
+		builder.setCapacity(this.capacity);
+		builder.setCount(this.count);
+		builder.setType(this.type);
+		for(Slot slot : this.slots){
+			builder.addSlot(slot.convertToProto());
+		}
+
+		return builder.build();
+	}
 }

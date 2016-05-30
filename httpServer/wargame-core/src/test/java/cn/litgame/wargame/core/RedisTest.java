@@ -1,43 +1,31 @@
 package cn.litgame.wargame.core;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.kriver.core.common.MathUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.Response;
-import redis.clients.jedis.Transaction;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class RedisTest {
 	private final static Logger log = Logger.getLogger(RedisTest.class);
 	ApplicationContext context = new ClassPathXmlApplicationContext(  
             "classpath*:application-config.xml"); 
 	JedisPool pool = (JedisPool) context.getBean("jedisStoragePool");
-	
+
 	@Test
 	public void test(){
 		int x = Math.abs(1 - 3);
 		int z = Math.abs(1 - 1);
 		int distance = (int)Math.sqrt(x * x + z * z);
 		System.out.println(distance);
-
-		try(Jedis jedis = pool.getResource();){
-			Transaction tx = jedis.multi();
-			tx.hset("hashsetTest".getBytes(), "key".getBytes(), "value".getBytes());
-			tx.hset("hashsetTest".getBytes(), "key".getBytes(), "value-a".getBytes());
-			Response<byte[]> bytes = tx.hget("hashsetTest".getBytes(), "key".getBytes());
-			tx.exec();
-			System.out.println(new String(bytes.get()));
-		}
-		
 	}
+
+
 	/**
 	 * 世界地图的生成
 	 * @param args

@@ -231,11 +231,90 @@ message MessageBody{
 	optional bool needUpdateResource = 1005;
 }
 
-message BattleInfo{
-	optional SimpleBattleInfo battleInfo = 1;
-	optional BattleDetail battleDetail = 2;
-	repeated BattleRoundInfo roundInfo = 3;
-	repeated BattleRoundDetail roundDetail = 4;
+message BattleField{
+	repeated ArmyDetail armysOffence = 1;
+	repeated ArmyDetail armysDefence = 2;
+	optional int32 currentRoundNum = 3[default = 1];
+	optional int32 fieldCityId = 4;
+	optional bool isLand = 5;
+	optional double moraleBuffIndex = 6;
+	optional double moraleDef = 7;
+	optional double moraleDownPercent = 8;
+	optional double moraleOff = 9;
+	optional int64 nextActionTime = 10;
+	optional BattleResult result = 11;
+	repeated BattleRound roundHistory = 12;
+	optional int64 startTime = 13;
+	repeated BattleUnitList troopsInFieldDef = 14;
+	repeated BattleUnitList troopsInFieldOff = 15;
+	optional string battleId = 16;
+	optional double weakMoraleExtra = 17;
+	repeated FieldPosition fieldPositionsForOff = 18;
+	repeated FieldPosition fieldPositionsForDef = 19;
+}
+
+message ArmyDetail{
+	optional int64 playerId = 1;
+	optional int32 cityId = 2;
+	repeated BattleTroopList backupTroops = 3;
+}
+
+message BattleTroopList{
+	repeated BattleTroop battleTroop = 1;
+	optional TroopType troopType = 2;
+}
+
+message BattleTroop{
+	optional int32 count = 1;
+	optional ResTroop resTroop = 2;
+}
+
+message FieldPosition{
+	optional BattleFieldType type = 1;
+	optional int32 capacity = 2;
+	optional int32 count = 3;
+	repeated Slot slot = 4;
+}
+
+message Slot{
+	optional int32 size = 1;
+	optional int32 capacity = 2;
+	optional int32 resTroopId = 3;
+	optional int32 seqNo = 4;
+}
+
+message BattleUnitList{
+	optional BattleFieldType type = 1;
+	repeated BattleUnit unit = 2;
+}
+
+message BattleUnit{
+	optional TroopType type = 1;
+	optional int32 originalHp = 2;
+	optional int32 orginalCount = 3;
+	optional BattleFieldType battleFieldType = 4;
+	optional int32 slotNum = 5;
+	optional int64 playerId = 6;
+	optional int32 cityId = 7;
+	optional int32 troopId = 8;
+	optional int32 attack = 9;
+	optional double percent = 10;
+	optional int32 attack2 = 11;
+	optional double percent2 = 12;
+	optional int32 amount = 13;
+	optional int32 hp = 14;
+	optional int32 defense = 15;
+	optional int32 space = 16;
+}
+
+message BattleRound{
+	optional int32 seqNo = 1;
+	optional BattleRoundInfo roundInfoOff = 2;
+	optional BattleRoundInfo roundInfoDef = 3;
+	optional BattleRoundDetail roundDetailOff = 4;
+	optional BattleRoundDetail roundDetailDef = 5;
+	optional int32 offenceLost = 6;
+	optional int32 defenceLost = 7;
 }
 
 message CSBattleDetail{
@@ -247,17 +326,11 @@ message SCBattleDetail{
 }
 
 message BattleDetail {
-	repeated Army offence = 1;
-	repeated Army defence = 2;
-	repeated int64 winnerId = 3;
-	optional int32 roundNum = 4;
-	optional int32 lastRoundTime = 5;
-	optional string cityName = 6;//战场城市的名字
-	optional CityResource resource = 7;
-	optional SimpleArmyInfo offenceInfo = 8;
-	optional SimpleArmyInfo defenceInfo = 9;
-	optional string battleId = 10;
-	optional bool isOver = 11;
+	optional SimpleBattleInfo simpleInfo = 1;
+	repeated Army offence = 2;
+	repeated Army defence = 3;
+	optional SimpleArmyInfo offenceInfo = 4;
+	optional SimpleArmyInfo defenceInfo = 5;
 }
 
 message Army{
@@ -290,11 +363,13 @@ message SimpleBattleInfo{
 	optional BattleType type = 8;
 	repeated int64 winnerId = 9;
 	required string battleId = 10;//索引
+	optional int32 roundNum = 11;
 }
 enum BattleResult {
 	OFFENCE_WIN = 1;
 	DEFENCE_WIN = 2;
 	EVEN = 3;
+	FIGHTING = 4;
 }
 enum BattleType {
 	LAND_WAR = 1;//陆战
@@ -330,10 +405,9 @@ message BattleRoundInfo{
 message RoundTroopInfo{
 	optional int32 troopId = 1;
 	optional int32 count = 2;
-	optional int32 lost = 3;
 }
 message BattleRoundDetail{
-	optional int32 battleId = 1;
+	optional string battleId = 1;
 	optional int32 roundNum = 2;
 	optional double morale = 3;
 	repeated RoundTroopDetail roundTroopDetail = 4;

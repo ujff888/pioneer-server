@@ -1,41 +1,29 @@
 package cn.litgame.wargame.core.logic.queue.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-
-import javax.annotation.Resource;
-
-import org.apache.commons.lang.CharSet;
-import org.apache.log4j.Logger;
-
-import com.google.protobuf.InvalidProtocolBufferException;
-
-import cn.litgame.wargame.core.auto.GameProtos;
 import cn.litgame.wargame.core.auto.GameGlobalProtos.GameActionType;
-import cn.litgame.wargame.core.auto.GameProtos.BattleInfo;
+import cn.litgame.wargame.core.auto.GameProtos;
 import cn.litgame.wargame.core.auto.GameProtos.CityResource;
-import cn.litgame.wargame.core.auto.GameProtos.CityResource.Builder;
-import cn.litgame.wargame.core.auto.GameProtos.SimpleBattleInfo;
 import cn.litgame.wargame.core.auto.GameProtos.TransportStatus;
 import cn.litgame.wargame.core.auto.GameProtos.TransportTask;
 import cn.litgame.wargame.core.logic.BattleLogic;
-import cn.litgame.wargame.core.logic.RedisKeyInfo;
 import cn.litgame.wargame.core.logic.queue.GameActionEvent;
 import cn.litgame.wargame.core.model.Building;
 import cn.litgame.wargame.core.model.City;
 import cn.litgame.wargame.core.model.GameAction;
-import cn.litgame.wargame.core.model.Player;
 import cn.litgame.wargame.core.model.battle.Army;
 import cn.litgame.wargame.core.model.battle.BattleField;
 import cn.litgame.wargame.core.model.battle.BattleRound;
-import redis.clients.jedis.Jedis;
+import com.google.protobuf.InvalidProtocolBufferException;
+import org.apache.log4j.Logger;
 import redis.clients.jedis.JedisPool;
+
+import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ListIterator;
 
 public class BattleRoundActionEvent extends GameActionEvent{
 	private static final Logger log = Logger.getLogger(BattleRoundActionEvent.class);
@@ -63,7 +51,7 @@ public class BattleRoundActionEvent extends GameActionEvent{
 	@Override
 	public void doLogic(GameAction gameAction, long nowTime) throws InvalidProtocolBufferException {
 		if(gameAction.getActionState() == TransportStatus.PK_VALUE) {
-			if(field.getResult() == BattleField.RESULT_FIGHTING){
+			if(field.getResult() == GameProtos.BattleResult.FIGHTING){
 				field.nextRound();
 				BattleRound round = field.saveRound();
 				
@@ -71,7 +59,7 @@ public class BattleRoundActionEvent extends GameActionEvent{
 				this.updateGameAction(gameAction);
 			}
 			
-			if(field.getResult() != BattleField.RESULT_FIGHTING){
+			if(field.getResult() != GameProtos.BattleResult.FIGHTING){
 				TransportTask.Builder newTask = TransportTask.newBuilder();
 				newTask.setType(GameActionType.TRANSPORT);
 				newTask.setShipCount(gameAction.getShipCount());
@@ -93,7 +81,7 @@ public class BattleRoundActionEvent extends GameActionEvent{
 	}
 	
 	private void plunder(TransportTask.Builder newTask, GameAction gameAction){
-		if(field.getResult() == BattleField.RESULT_OFFENCE_VICTORY){
+		if(field.getResult() == GameProtos.BattleResult.OFFENCE_WIN){
 			//检查码头
 			List<Building> wharfs = buildingLogic.getBuildings(targetCity.getCityId(), 1008);
 			CityResource.Builder resource = CityResource.newBuilder();
@@ -191,25 +179,7 @@ public class BattleRoundActionEvent extends GameActionEvent{
 
 	private void saveBattle(BattleRound round) {
 		
-		try(Jedis jedis = jedisStoragePool.getResource();){
-			BattleInfo.Builder battleInfo = BattleInfo.newBuilder();
-			battleInfo.setBattleInfo(field.convertToSimpleBattleInfoBuilder());
-			battleInfo.setBattleDetail(field.convertToBattleDetailBuilder());
-			
-			
-			if(round.getSeqNo() == 1){
-				for(Army a : field.getArmysOffence()){
-					jedis.rpush(this.buildPlayerBattleKey(a), field.getUUID().getBytes());
-				}
-			}
-			
-			jedis.hset(this.buildRedisKey(RedisKeyInfo.SIMPLE_BATTLE_INFO_KEY), field.getUUID().getBytes(), battleInfo.build().toByteArray());
-			
-			if(field.getResult() != BattleField.RESULT_FIGHTING){
-				String startTime = String.valueOf(field.getStartTime());
-			}
-			
-		}
+
 	}
 
 	private byte[] buildPlayerBattleKey(Army a){

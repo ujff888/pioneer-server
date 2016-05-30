@@ -1,37 +1,21 @@
 package cn.litgame.wargame.core.logic;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-
+import cn.litgame.wargame.core.auto.GameProtos;
+import cn.litgame.wargame.core.auto.GameResProtos.BattleGround;
+import cn.litgame.wargame.core.model.BattleTroop;
+import cn.litgame.wargame.core.model.battle.Army;
+import cn.litgame.wargame.core.model.battle.BattleField;
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.log4j.Logger;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import cn.litgame.wargame.core.auto.GameResProtos.BattleGround;
-import cn.litgame.wargame.core.model.battle.Army;
-import cn.litgame.wargame.core.model.battle.BattleField;
-import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
-import cn.litgame.wargame.core.model.battle.unit.BattleUnit;
-import cn.litgame.wargame.core.model.battle.unit.FlyFireBattleUnit;
-import junit.framework.Assert;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BattleLogicTest {
 
@@ -53,8 +37,8 @@ public class BattleLogicTest {
 	public void test(){
 		BattleGround bg = configLogic.getBattleGround(1, 1);
 		
-		List<BattleTroop> offence = new ArrayList<BattleTroop>();
-		List<BattleTroop> defence = new ArrayList<BattleTroop>();
+		List<BattleTroop> offence = new ArrayList<>();
+		List<BattleTroop> defence = new ArrayList<>();
 		List<Army> armysOffence = new ArrayList<>();
 		List<Army> armysDefence = new ArrayList<>();
 		
@@ -112,14 +96,13 @@ public class BattleLogicTest {
 //		offence.clear();
 //		offence.add(bt4);
 //		Army a1 = new Army(3L, 3, offence);
-		
-		System.out.println(a.convertToTroops());
-		
+
 		armysOffence.add(a);
 		//armysOffence.add(a1);
 	
 //		defence.add(bt);
 //		defence.add(bt1);
+		bt2.setCount(30);
 		defence.add(bt2);
 //		defence.add(bt6);
 //		defence.add(bt5);
@@ -138,36 +121,51 @@ public class BattleLogicTest {
 		
 		armysDefence.add(b);
 		//armysDefence.add(b1);
-		
+		BattleField field = new BattleField(armysOffence, armysDefence, bg, BattleField.LAND, 1);
+		GameProtos.BattleField fieldPb = null;
+		try {
+			fieldPb = GameProtos.BattleField.parseFrom(field.convertToProto().toByteArray());
+		} catch (InvalidProtocolBufferException e) {
+			e.printStackTrace();
+		}
+
+		fieldPb.toByteString();
+
+		BattleField field_alt = new BattleField(fieldPb);
+//		log.info("================================================================================");
+//		log.info(field);
+//		log.info("================================================================================");
+//		log.info(field_alt);
+//		log.info("================================================================================");
+//		log.info(fieldPb);
+
 		battleLogic.initAndSaveBattleField(armysOffence, armysDefence, bg, BattleField.LAND, 1);
-		int result = battleLogic.fight();
-		Assert.assertEquals(BattleField.RESULT_EVEN, result);
+		GameProtos.BattleResult result = battleLogic.fight();
+		Assert.assertEquals(GameProtos.BattleResult.DEFENCE_WIN, result);
 	}
 	
 
 	public static void main(String[] args){
-		List<Entry> strs = new ArrayList<>();
-		strs.add(new Entry(1,"hello"));
-		strs.add(new Entry(2,"world"));
-		
-		Entry temp = strs.get(0);
-		temp.i = 111;
-		temp.value = "new value";
-		System.out.println(strs);
-		System.out.println(strs.indexOf(temp));
-		
-		for(Entry e : strs){
-			if(e.i == 111){
-				e.value = "value-alt";
-			}
-		}
-		System.out.println(strs);
-		
-		strs.remove(temp);
-		System.out.println(strs.indexOf(temp));
-		System.out.println(strs);
-		
-		
+//		List<Entry> strs = new ArrayList<>();
+//		strs.add(new Entry(1,"hello"));
+//		strs.add(new Entry(2,"world"));
+//
+//		Entry temp = strs.get(0);
+//		temp.i = 111;
+//		temp.value = "new value";
+//		System.out.println(strs);
+//		System.out.println(strs.indexOf(temp));
+//
+//		for(Entry e : strs){
+//			if(e.i == 111){
+//				e.value = "value-alt";
+//				int index = strs.indexOf(e);
+//				strs.remove(index);
+//				System.out.println(e);
+//			}
+//		}
+//
+//		System.out.println(strs);
 	}
 }
 class Entry{

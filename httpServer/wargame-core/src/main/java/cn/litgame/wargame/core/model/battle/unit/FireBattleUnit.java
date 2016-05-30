@@ -1,11 +1,12 @@
 package cn.litgame.wargame.core.model.battle.unit;
 
+import cn.litgame.wargame.core.auto.GameProtos;
+import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
+import cn.litgame.wargame.core.model.BattleTroop;
+import cn.litgame.wargame.core.model.battle.Damage;
+
 import java.util.List;
 import java.util.Map;
-
-import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
-import cn.litgame.wargame.core.model.battle.Damage;
-import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
 
 /**
  * 火炮类型
@@ -22,6 +23,10 @@ public class FireBattleUnit extends BattleUnit {
 	
 	public FireBattleUnit(BattleTroop bt, int count, long playerId, int cityId) {
 		super(bt, count, playerId, cityId);
+	}
+
+	public FireBattleUnit(GameProtos.BattleUnit unit) {
+		super(unit);
 	}
 	
 	@Override

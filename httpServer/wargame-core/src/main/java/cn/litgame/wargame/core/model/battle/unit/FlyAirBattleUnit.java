@@ -1,11 +1,12 @@
 package cn.litgame.wargame.core.model.battle.unit;
 
+import cn.litgame.wargame.core.auto.GameProtos;
+import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
+import cn.litgame.wargame.core.model.BattleTroop;
+import cn.litgame.wargame.core.model.battle.Damage;
+
 import java.util.List;
 import java.util.Map;
-
-import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
-import cn.litgame.wargame.core.model.battle.Damage;
-import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
 
 /**
  * 空战类型
@@ -21,6 +22,10 @@ public class FlyAirBattleUnit extends BattleUnit {
 	
 	public FlyAirBattleUnit(BattleTroop bt, int count, long playerId, int cityId) {
 		super(bt, count, playerId, cityId);
+	}
+
+	public FlyAirBattleUnit(GameProtos.BattleUnit unit) {
+		super(unit);
 	}
 
 	@Override

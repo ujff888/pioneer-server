@@ -2,11 +2,19 @@ package cn.litgame.wargame.core.model;
 
 import cn.litgame.wargame.core.auto.GameResProtos.ResTroop;
 
-public class BattleTroop {
+import java.io.Serializable;
+
+public class BattleTroop implements Serializable {
+	private static final long serialVersionUID = -3580940326778807383L;
 	private int count;
 	private ResTroop resTroop;
 	
 	public BattleTroop(){}
+
+	public BattleTroop(BattleTroop battleTroop){
+		this.count = battleTroop.count;
+		this.resTroop = battleTroop.getResTroop().toBuilder().build();
+	}
 	
 	public BattleTroop(ResTroop rt, int i) {
 		this.resTroop = rt;

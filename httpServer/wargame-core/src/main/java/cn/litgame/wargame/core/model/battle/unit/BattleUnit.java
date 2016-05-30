@@ -1,20 +1,19 @@
 package cn.litgame.wargame.core.model.battle.unit;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
-
+import cn.litgame.wargame.core.auto.GameProtos;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
-import cn.litgame.wargame.core.auto.GameResProtos.ResTroop;
+import cn.litgame.wargame.core.model.BattleTroop;
 import cn.litgame.wargame.core.model.Building;
 import cn.litgame.wargame.core.model.battle.Army;
 import cn.litgame.wargame.core.model.battle.Damage;
 import cn.litgame.wargame.core.model.battle.FieldPosition;
 import cn.litgame.wargame.core.model.battle.Slot;
-import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
+import org.apache.log4j.Logger;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 细化的作战单位，是所有具体作战单位的基类
@@ -31,11 +30,12 @@ public abstract class BattleUnit implements Serializable{
 	private static final long serialVersionUID = 5530170536339482598L;
 	
 	private static final Logger log = Logger.getLogger(BattleUnit.class);
-	protected final int originalAmount;
-	protected final int originalHp;
-	
-	protected FieldPosition position;
-	protected Slot slot;
+	protected int originalHp;
+
+	protected int originalCount;
+
+	protected BattleFieldType battleFieldType;
+	protected int slotNum;
 	
 	protected long playerId;
 	protected int cityId;
@@ -53,8 +53,25 @@ public abstract class BattleUnit implements Serializable{
 	public BattleUnit(Building fort){
 		this.playerId = fort.getPlayerId();
 		this.cityId = fort.getCityId();
-		this.originalAmount = 0;
 		this.originalHp = 0;
+	}
+
+	public BattleUnit(GameProtos.BattleUnit unit){
+		this.originalHp = unit.getOriginalHp();
+		this.originalCount = unit.getOrginalCount();
+		this.battleFieldType = unit.getBattleFieldType();
+		this.slotNum = unit.getSlotNum();
+		this.playerId = unit.getPlayerId();
+		this.cityId = unit.getCityId();
+		this.troopId = unit.getTroopId();
+		this.attack = unit.getAttack();
+		this.percent = unit.getPercent();
+		this.attack2 = unit.getAttack2();
+		this.percent2 = unit.getPercent2();
+		this.amount = unit.getAmount();
+		this.hp = unit.getHp();
+		this.defense = unit.getDefense();
+		this.space = unit.getSpace();
 	}
 	
 	public BattleUnit(BattleTroop bt, int count, long playerId, int cityId) {
@@ -69,8 +86,8 @@ public abstract class BattleUnit implements Serializable{
 		this.defense = count*bt.getResTroop().getDefense();
 		this.space = count*bt.getResTroop().getSpace();
 
-		this.originalAmount = bt.getResTroop().getAmount();
 		this.originalHp = bt.getResTroop().getHp();
+		this.originalCount = count;
 		
 		this.playerId = playerId;
 		this.cityId = cityId;
@@ -95,20 +112,21 @@ public abstract class BattleUnit implements Serializable{
 	public int getAttack() {
 		return this.attack;
 	}
-	public FieldPosition getPosition() {
-		return position;
+
+	public BattleFieldType getBattleFieldType() {
+		return battleFieldType;
 	}
 
-	public void setPosition(FieldPosition position) {
-		this.position = position;
+	public void setBattleFieldType(BattleFieldType battleFieldType) {
+		this.battleFieldType = battleFieldType;
 	}
-	
-	public Slot getSlot() {
-		return this.slot;
+
+	public int getSlotNum() {
+		return slotNum;
 	}
-	
-	public void setSlot(Slot slot) {
-		this.slot = slot;
+
+	public void setSlotNum(int slotNo) {
+		this.slotNum = slotNo;
 	}
 
 	public int getTroopId() {
@@ -178,8 +196,15 @@ public abstract class BattleUnit implements Serializable{
 		return this.space;
 	}
 
-	public int getOriginalAmount() {
-		return originalAmount;
+	public int getOriginalCount() {
+		return originalCount;
+	}
+
+	public void setOriginalCount(int originalCount) {
+		this.originalCount = originalCount;
+	}
+	public void setOriginalHp(int originalHp) {
+		this.originalHp = originalHp;
 	}
 	public int getOriginalHp() {
 		return originalHp;
@@ -204,10 +229,11 @@ public abstract class BattleUnit implements Serializable{
 	 * @param slot
 	 */
 	public void comeToField(FieldPosition position, Slot slot){
-		this.setPosition(position);
-		this.setSlot(slot);
-		this.slot.add(this);
-		log.info("一个单位"+this.troopId+"上场，位置:"+position.getType());
+		this.setBattleFieldType(position.getType());
+		this.setSlotNum(slot.getNum());
+
+		slot.add(this);
+		log.info("一个单位"+this.troopId+"上场，位置:"+position.getType()+" 数目："+this.getCount());
 	}
 	
 	/**
@@ -233,7 +259,7 @@ public abstract class BattleUnit implements Serializable{
 			for(BattleFieldType type : attackOrder){
 				if(enemy.get(type) == null){
 					enemy.put(type, new ArrayList<>());
-					break;
+					continue;
 				}
 				int size = enemy.get(type).size();
 				if(size >= targetCount){
@@ -266,10 +292,23 @@ public abstract class BattleUnit implements Serializable{
 
 	@Override
 	public String toString() {
-		return "BattleUnit [originalAmount=" + originalAmount + ", position=" + position + ", slot=" + slot
-				+ ", playerId=" + playerId + ", cityId=" + cityId + ", troopId=" + troopId + ", attack=" + attack
-				+ ", percent=" + percent + ", attack2=" + attack2 + ", percent2=" + percent2 + ", amount=" + amount
-				+ ", hp=" + hp + ", defense=" + defense + ", space=" + space + "]";
+		return "BattleUnit{" +
+				"originalHp=" + originalHp +
+				", originalCount=" + originalCount +
+				", battleFieldType=" + battleFieldType +
+				", slotNum=" + slotNum +
+				", playerId=" + playerId +
+				", cityId=" + cityId +
+				", troopId=" + troopId +
+				", attack=" + attack +
+				", percent=" + percent +
+				", attack2=" + attack2 +
+				", percent2=" + percent2 +
+				", amount=" + amount +
+				", hp=" + hp +
+				", defense=" + defense +
+				", space=" + space +
+				'}';
 	}
 
 	/**
@@ -286,12 +325,8 @@ public abstract class BattleUnit implements Serializable{
 	 */
 	public abstract void doAction(Map<BattleFieldType, List<BattleUnit>> enemy, Map<BattleFieldType, List<BattleUnit>> self, Map<BattleFieldType, Damage> targetDamages);
 	
-	public double getAmountRemain() {
-		if(this.originalAmount == 0)
-			return -1;
-		else{
-			return (double)amount/originalAmount;
-		}
+	public int getAmountRemain() {
+		return this.amount;
 	}
 
 	public void takeDamage(int ad) {
@@ -300,7 +335,7 @@ public abstract class BattleUnit implements Serializable{
 	}
 	
 	public int getCount() {
-		return (hp+originalHp)/originalHp -1;
+		return (hp+originalHp-1)/originalHp;
 	}
 
 	public BattleUnit add(BattleUnit bu) {
@@ -310,7 +345,29 @@ public abstract class BattleUnit implements Serializable{
 		this.hp += bu.getHp();
 		this.defense += bu.getDefense();
 		this.space += bu.getSpace();
+		this.originalCount += bu.getCount();
 		
 		return this;
+	}
+
+	public GameProtos.BattleUnit convertToProto() {
+		GameProtos.BattleUnit.Builder battleUnitBuilder = GameProtos.BattleUnit.newBuilder();
+		battleUnitBuilder.setOriginalHp(this.originalHp);
+		battleUnitBuilder.setOrginalCount(this.originalCount);
+		battleUnitBuilder.setBattleFieldType(this.battleFieldType);
+		battleUnitBuilder.setSlotNum(this.slotNum);
+		battleUnitBuilder.setPlayerId(this.playerId);
+		battleUnitBuilder.setCityId(this.cityId);
+		battleUnitBuilder.setTroopId(this.troopId);
+		battleUnitBuilder.setAttack(this.attack);
+		battleUnitBuilder.setPercent(this.percent);
+		battleUnitBuilder.setAttack2(this.attack2);
+		battleUnitBuilder.setPercent2(this.percent2);
+		battleUnitBuilder.setAmount(this.amount);
+		battleUnitBuilder.setHp(this.hp);
+		battleUnitBuilder.setDefense(this.defense);
+		battleUnitBuilder.setSpace(this.space);
+
+		return battleUnitBuilder.build();
 	}
 }

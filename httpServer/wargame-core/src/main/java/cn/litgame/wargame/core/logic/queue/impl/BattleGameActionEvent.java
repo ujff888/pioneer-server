@@ -1,12 +1,5 @@
 package cn.litgame.wargame.core.logic.queue.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Resource;
-
-import org.springframework.stereotype.Service;
-
 import cn.litgame.wargame.core.auto.GameGlobalProtos.GameActionType;
 import cn.litgame.wargame.core.auto.GameProtos;
 import cn.litgame.wargame.core.auto.GameProtos.TransportStatus;
@@ -16,11 +9,16 @@ import cn.litgame.wargame.core.auto.GameResProtos.ResTroop;
 import cn.litgame.wargame.core.logic.BattleLogic;
 import cn.litgame.wargame.core.logic.ConfigLogic;
 import cn.litgame.wargame.core.logic.queue.GameActionEvent;
+import cn.litgame.wargame.core.model.BattleTroop;
 import cn.litgame.wargame.core.model.GameAction;
 import cn.litgame.wargame.core.model.Troop;
 import cn.litgame.wargame.core.model.battle.Army;
 import cn.litgame.wargame.core.model.battle.BattleField;
-import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class BattleGameActionEvent extends GameActionEvent {

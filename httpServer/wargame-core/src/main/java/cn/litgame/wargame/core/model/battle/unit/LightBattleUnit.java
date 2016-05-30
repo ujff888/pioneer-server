@@ -1,11 +1,12 @@
 package cn.litgame.wargame.core.model.battle.unit;
 
+import cn.litgame.wargame.core.auto.GameProtos;
+import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
+import cn.litgame.wargame.core.model.BattleTroop;
+import cn.litgame.wargame.core.model.battle.Damage;
+
 import java.util.List;
 import java.util.Map;
-
-import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
-import cn.litgame.wargame.core.model.battle.Damage;
-import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
 
 /**
  * 轻型部队
@@ -31,15 +32,19 @@ public class LightBattleUnit extends BattleUnit {
 		super(bt, count, playerId, cityId);
 	}
 
+	public LightBattleUnit(GameProtos.BattleUnit unit){
+		super(unit);
+	}
+
 	@Override
 	public BattleFieldType[] getOrder() {
-		switch(this.getPosition().getType()){
+		switch(this.getBattleFieldType()){
 		case FIELD_CLOSE:
 			return LightBattleUnit.order_close;
 		case FIELD_SIDE:
 			return LightBattleUnit.order_side;
 		default:
-			throw new RuntimeException("unkown BattleFieldType: " + this.getPosition().getType());
+			throw new RuntimeException("unkown BattleFieldType: " + this.getBattleFieldType());
 		}
 	}
 

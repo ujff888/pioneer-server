@@ -1,11 +1,12 @@
 package cn.litgame.wargame.core.model.battle.unit;
 
+import cn.litgame.wargame.core.auto.GameProtos;
+import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
+import cn.litgame.wargame.core.model.BattleTroop;
+import cn.litgame.wargame.core.model.battle.Damage;
+
 import java.util.List;
 import java.util.Map;
-
-import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
-import cn.litgame.wargame.core.model.battle.Damage;
-import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
 
 /**
  * 远程部队
@@ -29,15 +30,18 @@ public class RemoteBattleUnit extends BattleUnit {
 		super(bt, count, playerId, cityId);
 	}
 
+	public RemoteBattleUnit(GameProtos.BattleUnit unit) {
+		super(unit);
+	}
 	@Override
 	public BattleFieldType[] getOrder() {
-		switch(this.getPosition().getType()){
+		switch(this.getBattleFieldType()){
 		case FIELD_CLOSE:
 			return RemoteBattleUnit.order_close;
 		case FIELD_REMOTE:
 			return RemoteBattleUnit.order_remote;
 		default:
-			throw new RuntimeException("unkown BattleFieldType: " + this.getPosition().getType());
+			throw new RuntimeException("unkown BattleFieldType: " + this.getBattleFieldType());
 		}
 	}
 

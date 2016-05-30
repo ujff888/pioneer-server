@@ -70,13 +70,8 @@ public class BattleLogic {
 		
 		Jedis jedis = jedisStoragePool.getResource();
 		try{
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeObject(battleField);
-			jedis.set(redis_key.getBytes(), bos.toByteArray());
-		} catch (IOException e) {
-			log.error(e);
-		} finally{
+			jedis.set(redis_key.getBytes(), battleField.convertToProto().toByteArray());
+		}finally{
 			jedis.close();
 		}
 	}
@@ -85,9 +80,9 @@ public class BattleLogic {
 		return new BattleField(offenceArmys, defenceArmys, battleGround, isLand, cityId);
 	}
 	
-	public int fight(){
+	public GameProtos.BattleResult fight(){
 		BattleField field = loadBattleField();
-		while(field.getResult() == 0){
+		while(field.getResult() == GameProtos.BattleResult.FIGHTING){
 			field = loadBattleField();
 			field.nextRound();
 			field.saveRound();
@@ -100,9 +95,12 @@ public class BattleLogic {
 		String redis_key = "battleField_cache";	
 		BattleField field = null;
 		try(Jedis jedis = jedisStoragePool.getResource()){
-			field = BattleField.parseFromByteArray(jedis.get(redis_key.getBytes()));
-		} 
-		
+			GameProtos.BattleField p = GameProtos.BattleField.parseFrom(jedis.get(redis_key.getBytes()));
+			field = new BattleField(p);
+		} catch (InvalidProtocolBufferException e) {
+			e.printStackTrace();
+		}
+
 		if(field == null)
 			throw new RuntimeException("read BattleField error!");
 		

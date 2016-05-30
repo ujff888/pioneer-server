@@ -1,11 +1,12 @@
 package cn.litgame.wargame.core.model.battle.unit;
 
+import cn.litgame.wargame.core.auto.GameProtos;
+import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
+import cn.litgame.wargame.core.model.BattleTroop;
+import cn.litgame.wargame.core.model.battle.Damage;
+
 import java.util.List;
 import java.util.Map;
-
-import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
-import cn.litgame.wargame.core.model.battle.Damage;
-import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
 
 /**
  * npc类型
@@ -17,6 +18,10 @@ public class NpcBattleUnit extends BattleUnit {
 
 	public NpcBattleUnit(BattleTroop bt, int count, long playerId, int cityId) {
 		super(bt, count, playerId, cityId);
+	}
+
+	public NpcBattleUnit(GameProtos.BattleUnit unit) {
+		super(unit);
 	}
 
 	@Override

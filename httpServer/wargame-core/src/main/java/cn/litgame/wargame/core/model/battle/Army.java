@@ -1,32 +1,16 @@
 package cn.litgame.wargame.core.model.battle;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
 import cn.litgame.wargame.core.auto.GameProtos;
-import cn.litgame.wargame.core.auto.GameProtos.Troop;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
 import cn.litgame.wargame.core.auto.GameResProtos.ResTroop;
 import cn.litgame.wargame.core.auto.GameResProtos.TroopType;
 import cn.litgame.wargame.core.logic.ConfigLogic;
-import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
-import cn.litgame.wargame.core.model.battle.troop.TroopHandler;
-import cn.litgame.wargame.core.model.battle.unit.BattleUnit;
-import cn.litgame.wargame.core.model.battle.unit.FireBattleUnit;
-import cn.litgame.wargame.core.model.battle.unit.FlyAirBattleUnit;
-import cn.litgame.wargame.core.model.battle.unit.FlyFireBattleUnit;
-import cn.litgame.wargame.core.model.battle.unit.LightBattleUnit;
-import cn.litgame.wargame.core.model.battle.unit.LogisticsBattleUnit;
-import cn.litgame.wargame.core.model.battle.unit.NpcBattleUnit;
-import cn.litgame.wargame.core.model.battle.unit.RemoteBattleUnit;
-import cn.litgame.wargame.core.model.battle.unit.WeightBattleUnit;
+import cn.litgame.wargame.core.model.BattleTroop;
+import cn.litgame.wargame.core.model.battle.unit.*;
+
+import javax.annotation.Resource;
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * 军队的抽象
@@ -46,10 +30,26 @@ public class Army implements Serializable{
 	
 	private long playerId;
 	private int cityId;
-	
+
+	public GameProtos.ArmyDetail convertToProto() {
+		GameProtos.ArmyDetail.Builder builder = GameProtos.ArmyDetail.newBuilder();
+		builder.setPlayerId(this.playerId);
+		builder.setCityId(this.cityId);
+		for(Map.Entry<TroopType, List<BattleTroop>> entry : this.backupBattleTroops.entrySet()){
+			GameProtos.BattleTroopList.Builder battleTroopList = GameProtos.BattleTroopList.newBuilder();
+			battleTroopList.setTroopType(entry.getKey());
+			for(BattleTroop battleTroop : entry.getValue()){
+				GameProtos.BattleTroop.Builder battleTroopBuilder = GameProtos.BattleTroop.newBuilder();
+				battleTroopBuilder.setCount(battleTroop.getCount()).setResTroop(battleTroop.getResTroop());
+				battleTroopList.addBattleTroop(battleTroopBuilder);
+			}
+			builder.addBackupTroops(battleTroopList);
+		}
+		return builder.build();
+	}
+
 	private static class FireComparator implements Comparator<BattleTroop>{
 		static final FireComparator INSTANCE = new FireComparator();
-		private FireComparator(){}
 		@Override
 		public int compare(BattleTroop o1, BattleTroop o2) {
 			if(o2.getResTroop().getAmount() != 0){
@@ -104,6 +104,20 @@ public class Army implements Serializable{
 	private Map<TroopType, List<BattleTroop>> backupBattleTroops = new HashMap<>();
 	//private Map<Integer, Integer> backupTroopsCount = new HashMap<>();
 
+	public Army(GameProtos.ArmyDetail detail){
+		this(detail.getPlayerId(), detail.getCityId());
+		for(GameProtos.BattleTroopList pbBattleTroops : detail.getBackupTroopsList()){
+			List<BattleTroop> battleTroopList = new ArrayList<>();
+			for(GameProtos.BattleTroop battleTroop : pbBattleTroops.getBattleTroopList()){
+				BattleTroop temp = new BattleTroop();
+				temp.setCount(battleTroop.getCount());
+				temp.setResTroop(battleTroop.getResTroop());
+				battleTroopList.add(temp);
+			}
+			this.backupBattleTroops.put(pbBattleTroops.getTroopType(), battleTroopList);
+		}
+	}
+
 	public Army(long playerId, int cityId) {
 		this.setPlayerId(playerId);
 		this.setCityId(cityId);
@@ -119,7 +133,7 @@ public class Army implements Serializable{
 			List<BattleTroop> battleTroopList = this.getBackupBattleTroopsByType(troopType);
 
 			if(bt.getCount() >0)
-				battleTroopList.add(bt);
+				battleTroopList.add(new BattleTroop(bt));
 			this.backupBattleTroops.put(troopType, battleTroopList);
 			
 			//TODO：BattleTroop这个对象多态掉，不同的士兵，应该自己知道去哪里，多态的实现方式参照server服务器里面的handler自动注册，自动多态调用的方式，不需要switch函数
@@ -292,7 +306,7 @@ public class Army implements Serializable{
 					if(temp.getCount() == 0)
 						backups.remove(temp);
 					
-					nextUnit = new FlyFireBattleUnit(temp, count);
+					nextUnit = new FlyFireBattleUnit(temp, count, this.playerId, this.cityId);
 					return nextUnit;
 				}else{
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -303,7 +317,7 @@ public class Army implements Serializable{
 							if(bt.getCount() == 0)
 								backups.remove(bt);
 
-							nextUnit = new FlyFireBattleUnit(bt, count);
+							nextUnit = new FlyFireBattleUnit(bt, count, this.playerId, this.cityId);
 							return nextUnit;
 						}
 					}
@@ -322,7 +336,7 @@ public class Army implements Serializable{
 					if(temp.getCount() == 0)
 						backups.remove(temp);
 					
-					nextUnit = new RemoteBattleUnit(temp, count);
+					nextUnit = new RemoteBattleUnit(temp, count, this.playerId, this.cityId);
 					return nextUnit;
 				}else{
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -333,7 +347,7 @@ public class Army implements Serializable{
 							if(bt.getCount() == 0)
 								backups.remove(bt);
 
-							nextUnit = new RemoteBattleUnit(bt, count);
+							nextUnit = new RemoteBattleUnit(bt, count, this.playerId, this.cityId);
 							return nextUnit;
 						}
 					}
@@ -352,7 +366,7 @@ public class Army implements Serializable{
 					if(temp.getCount() == 0)
 						backups.remove(temp);
 					
-					nextUnit = new LightBattleUnit(temp, count);
+					nextUnit = new LightBattleUnit(temp, count, this.playerId, this.cityId);
 					return nextUnit;
 				}else{
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -363,7 +377,7 @@ public class Army implements Serializable{
 							if(bt.getCount() == 0)
 								backups.remove(bt);
 
-							nextUnit = new LightBattleUnit(bt, count);
+							nextUnit = new LightBattleUnit(bt, count, this.playerId, this.cityId);
 							return nextUnit;
 						}
 					}
@@ -382,7 +396,7 @@ public class Army implements Serializable{
 					if(temp.getCount() == 0)
 						backups.remove(temp);
 					
-					nextUnit = new FlyAirBattleUnit(temp, count);
+					nextUnit = new FlyAirBattleUnit(temp, count, this.playerId, this.cityId);
 					return nextUnit;
 				}else{
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -393,7 +407,7 @@ public class Army implements Serializable{
 							if(bt.getCount() == 0)
 								backups.remove(bt);
 
-							nextUnit = new FlyAirBattleUnit(bt, count);
+							nextUnit = new FlyAirBattleUnit(bt, count, this.playerId, this.cityId);
 							return nextUnit;
 						}
 					}
@@ -412,7 +426,7 @@ public class Army implements Serializable{
 					if(temp.getCount() == 0)
 						backups.remove(temp);
 					
-					nextUnit = new FireBattleUnit(temp, count);
+					nextUnit = new FireBattleUnit(temp, count, this.playerId, this.cityId);
 					return nextUnit;
 				}else{
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -423,7 +437,7 @@ public class Army implements Serializable{
 							if(bt.getCount() == 0)
 								backups.remove(bt);
 
-							nextUnit = new FireBattleUnit(bt, count);
+							nextUnit = new FireBattleUnit(bt, count, this.playerId, this.cityId);
 							return nextUnit;
 						}
 					}
@@ -441,7 +455,7 @@ public class Army implements Serializable{
 					if(temp.getCount() == 0)
 						backups.remove(temp);
 					
-					nextUnit = new WeightBattleUnit(temp, count);
+					nextUnit = new WeightBattleUnit(temp, count, this.playerId, this.cityId);
 					return nextUnit;
 				}else{
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -452,7 +466,7 @@ public class Army implements Serializable{
 							if(bt.getCount() == 0)
 								backups.remove(bt);
 
-							nextUnit = new WeightBattleUnit(bt, count);
+							nextUnit = new WeightBattleUnit(bt, count, this.playerId, this.cityId);
 							return nextUnit;
 						}
 					}
@@ -468,7 +482,7 @@ public class Army implements Serializable{
 						if(temp.getCount() == 0)
 							backups.remove(temp);
 						
-						nextUnit = new LightBattleUnit(temp, count);
+						nextUnit = new LightBattleUnit(temp, count, this.playerId, this.cityId);
 						return nextUnit;
 					}else{
 						for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -479,7 +493,7 @@ public class Army implements Serializable{
 								if(bt.getCount() == 0)
 									backups.remove(bt);
 								
-								nextUnit = new LightBattleUnit(bt, count);
+								nextUnit = new LightBattleUnit(bt, count, this.playerId, this.cityId);
 								return nextUnit;
 							}
 						}
@@ -494,7 +508,7 @@ public class Army implements Serializable{
 						if(temp.getCount() == 0)
 							backups.remove(temp);
 						
-						nextUnit = new RemoteBattleUnit(temp, count);
+						nextUnit = new RemoteBattleUnit(temp, count, this.playerId, this.cityId);
 						return nextUnit;
 					}else{
 						for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -505,7 +519,7 @@ public class Army implements Serializable{
 								if(bt.getCount() == 0)
 									backups.remove(bt);
 								
-								nextUnit = new RemoteBattleUnit(bt, count);
+								nextUnit = new RemoteBattleUnit(bt, count, this.playerId, this.cityId);
 								return nextUnit;
 							}
 						}
@@ -541,7 +555,11 @@ public class Army implements Serializable{
 
 	@Override
 	public String toString() {
-		return "Army [playerId=" + playerId + ", cityId=" + cityId + ", backupBattleTroops=" + backupBattleTroops + "]";
+		return "Army{" +
+				"playerId=" + playerId +
+				", cityId=" + cityId +
+				", backupBattleTroops=" + backupBattleTroops +
+				'}';
 	}
 
 	public List<GameProtos.Troop> convertToTroops() {
