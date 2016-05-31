@@ -94,11 +94,14 @@ public class BattleLogic {
 	public BattleField loadBattleField() {
 		String redis_key = "battleField_cache";	
 		BattleField field = null;
-		try(Jedis jedis = jedisStoragePool.getResource()){
+		Jedis jedis = jedisStoragePool.getResource();
+		try{
 			GameProtos.BattleField p = GameProtos.BattleField.parseFrom(jedis.get(redis_key.getBytes()));
 			field = new BattleField(p);
 		} catch (InvalidProtocolBufferException e) {
 			e.printStackTrace();
+		} finally {
+			jedis.close();
 		}
 
 		if(field == null)
@@ -110,14 +113,8 @@ public class BattleLogic {
 	public void saveBattleField(BattleField battleField) {
 		String redis_key = "battleField_cache";	
 		
-		try(ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				ObjectOutputStream oos = new ObjectOutputStream(bos);
-				Jedis jedis = jedisStoragePool.getResource();){
-			
-			oos.writeObject(battleField);
-			jedis.set(redis_key.getBytes(), bos.toByteArray());
-		} catch (IOException e) {
-			log.error(e);
+		try(Jedis jedis = jedisStoragePool.getResource()){
+			jedis.set(redis_key.getBytes(), battleField.convertToProto().toByteArray());
 		}
 	}
 	

@@ -5,7 +5,6 @@ import cn.litgame.wargame.core.auto.GameResProtos.BattleGround;
 import cn.litgame.wargame.core.model.BattleTroop;
 import cn.litgame.wargame.core.model.battle.Army;
 import cn.litgame.wargame.core.model.battle.BattleField;
-import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
@@ -121,17 +120,24 @@ public class BattleLogicTest {
 		
 		armysDefence.add(b);
 		//armysDefence.add(b1);
-		BattleField field = new BattleField(armysOffence, armysDefence, bg, BattleField.LAND, 1);
-		GameProtos.BattleField fieldPb = null;
-		try {
-			fieldPb = GameProtos.BattleField.parseFrom(field.convertToProto().toByteArray());
-		} catch (InvalidProtocolBufferException e) {
-			e.printStackTrace();
-		}
+//		BattleField field = new BattleField(armysOffence, armysDefence, bg, BattleField.LAND, 1);
+//		GameProtos.BattleField fieldPb = field.convertToProto();
+//
+//		String redis_key = "battleField_cache";
+//		try(Jedis jedis = pool.getResource()){
+//			jedis.set(redis_key.getBytes(), field.convertToProto().toByteArray());
+//			byte[] bytes = jedis.get(redis_key.getBytes());
+//			byte[] abytes = fieldPb.toByteArray();
+//			Assert.assertEquals(bytes.length, abytes.length);
+//			for(int i=0;i<bytes.length;i++){
+//				Assert.assertEquals(bytes[i], abytes[i]);
+//			}
+//			fieldPb = GameProtos.BattleField.parseFrom(bytes);
+//		} catch (InvalidProtocolBufferException e) {
+//			e.printStackTrace();
+//		}
 
-		fieldPb.toByteString();
-
-		BattleField field_alt = new BattleField(fieldPb);
+//		BattleField field_alt = new BattleField(fieldPb);
 //		log.info("================================================================================");
 //		log.info(field);
 //		log.info("================================================================================");

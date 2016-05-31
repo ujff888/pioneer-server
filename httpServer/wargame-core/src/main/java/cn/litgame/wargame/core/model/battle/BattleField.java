@@ -135,9 +135,9 @@ public class BattleField implements Serializable {
 		this.moraleDownPercent = battleField.getMoraleDownPercent();
 		this.moraleOff = battleField.getMoraleOff();
 		this.result = battleField.getResult();
-//		for(GameProtos.BattleRound round : battleField.getRoundHistoryList()){
-//			this.roundHistoryPb.add(new cn.litgame.wargame.core.model.battle.protoround.BattleRound(round));
-//		}
+		for(GameProtos.BattleRound round : battleField.getRoundHistoryList()){
+			this.roundHistoryPb.add(new cn.litgame.wargame.core.model.battle.protoround.BattleRound(round));
+		}
 		this.setTroopsInField(OFFENCE, battleField);
 		this.setTroopsInField(DEFENCE, battleField);
 		this.weakMoraleExtra = battleField.getWeakMoraleExtra();
@@ -1032,9 +1032,9 @@ public class BattleField implements Serializable {
 		battleField.setNextActionTime(this.getNextActionTime());
 		battleField.setResult(this.result);
 
-//		for(cn.litgame.wargame.core.model.battle.protoround.BattleRound round : this.roundHistoryPb){
-//			battleField.addRoundHistory(round.convertToProto());
-//		}
+		for(cn.litgame.wargame.core.model.battle.protoround.BattleRound round : this.roundHistoryPb){
+			battleField.addRoundHistory(round.convertToProto());
+		}
 
 		log.info(currentRoundPb);
 
