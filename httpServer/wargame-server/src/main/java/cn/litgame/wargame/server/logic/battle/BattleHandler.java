@@ -27,12 +27,6 @@ public class BattleHandler  extends KHttpMessageHandler{
 		case MSG_ID_BATTLE_LIST:
 			battleProcess.battleList(messageBody.getCsBattleList());
 			return KHttpMessageHandler.CATCH_HANDLER;
-		case MSG_ID_ROUND_LIST:
-			battleProcess.roundList(messageBody.getCsRoundList());
-			return KHttpMessageHandler.CATCH_HANDLER;
-		case MSG_ID_ROUND_DETAIL:
-			battleProcess.roundDetail(messageBody.getCsRoundDetail());
-			return KHttpMessageHandler.CATCH_HANDLER;
 		default:
 			return KHttpMessageHandler.NOT_CATCH_HANDLER;
 		}

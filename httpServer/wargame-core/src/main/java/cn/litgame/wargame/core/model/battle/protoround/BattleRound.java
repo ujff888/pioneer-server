@@ -5,11 +5,9 @@ import cn.litgame.wargame.core.auto.GameResProtos;
 import cn.litgame.wargame.core.model.BattleTroop;
 import cn.litgame.wargame.core.model.battle.Army;
 import cn.litgame.wargame.core.model.battle.BattleField;
-import cn.litgame.wargame.core.model.battle.unit.BattleUnit;
 import org.apache.log4j.Logger;
 
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -152,42 +150,42 @@ public class BattleRound {
     }
 
     public GameProtos.BattleRoundDetail generateRoundDetail(BattleField field, boolean isOffence){
-        Map<GameResProtos.BattleFieldType, List<BattleUnit>> troopsInfield = isOffence ?
-                field.getTroopsInFieldOffence() : field.getTroopsInFieldDefence();
-
+//        Map<GameResProtos.BattleFieldType, List<BattleUnit>> troopsInfield = isOffence ?
+//                field.getTroopsInFieldOffence() : field.getTroopsInFieldDefence();
+//
         GameProtos.BattleRoundDetail.Builder battleRoundDetail = isOffence ? roundDetailOff.toBuilder() : roundDetailDef.toBuilder();
-        battleRoundDetail.setBattleId(field.getUUID()).setRoundNum(this.seqNo);
-        battleRoundDetail.setMorale(isOffence ? field.getMoraleOff() : field.getMoraleDef());
-        for(Map.Entry<GameResProtos.BattleFieldType, List<BattleUnit>> entry : troopsInfield.entrySet()){
-            for(BattleUnit battleUnit : entry.getValue()){
-                boolean exists = false;
-                int index = -1;
-                for(GameProtos.RoundTroopDetail roundTroopDetail : battleRoundDetail.getRoundTroopDetailList()){
-                    index++;
-                    if(roundTroopDetail.getTroopId() == battleUnit.getTroopId() && roundTroopDetail.getFieldType() == entry.getKey()){
-                        GameProtos.RoundTroopDetail.Builder builder = roundTroopDetail.toBuilder();
-                        builder.setCount(builder.getCount() + battleUnit.getCount());
-                        battleRoundDetail.removeRoundTroopDetail(index);
-                        battleRoundDetail.addRoundTroopDetail(builder);
-                        exists = true;
-                        break;
-                    }
-                }
-                if(!exists){
-                    GameProtos.RoundTroopDetail.Builder builder = GameProtos.RoundTroopDetail.newBuilder();
-                    builder.setTroopId(battleUnit.getTroopId()).setFieldType(entry.getKey()).setCount(builder.getCount());
-                    battleRoundDetail.addRoundTroopDetail(builder);
-                }
-            }
-        }
+//        battleRoundDetail.setBattleId(field.getUUID()).setRoundNum(this.seqNo);
+//        battleRoundDetail.setMorale(isOffence ? field.getMoraleOff() : field.getMoraleDef());
+//        for(Map.Entry<GameResProtos.BattleFieldType, List<BattleUnit>> entry : troopsInfield.entrySet()){
+//            for(BattleUnit battleUnit : entry.getValue()){
+//                boolean exists = false;
+//                int index = -1;
+//                for(GameProtos.RoundTroopDetail roundTroopDetail : battleRoundDetail.getRoundTroopDetailList()){
+//                    index++;
+//                    if(roundTroopDetail.getTroopId() == battleUnit.getTroopId() && roundTroopDetail.getFieldType() == entry.getKey()){
+//                        GameProtos.RoundTroopDetail.Builder builder = roundTroopDetail.toBuilder();
+//                        builder.setCount(builder.getCount() + battleUnit.getCount());
+//                        battleRoundDetail.removeRoundTroopDetail(index);
+//                        battleRoundDetail.addRoundTroopDetail(builder);
+//                        exists = true;
+//                        break;
+//                    }
+//                }
+//                if(!exists){
+//                    GameProtos.RoundTroopDetail.Builder builder = GameProtos.RoundTroopDetail.newBuilder();
+//                    builder.setTroopId(battleUnit.getTroopId()).setFieldType(entry.getKey()).setCount(builder.getCount());
+//                    battleRoundDetail.addRoundTroopDetail(builder);
+//                }
+//            }
+//        }
         GameProtos.BattleRoundDetail value = battleRoundDetail.build();
-        if(isOffence){
-            this.roundDetailOff = value;
-        }else{
-            this.roundDetailDef = value;
-        }
-        log.info(isOffence);
-        log.info(value);
+//        if(isOffence){
+//            this.roundDetailOff = value;
+//        }else{
+//            this.roundDetailDef = value;
+//        }
+//        log.info(isOffence);
+//        log.info(value);
         return value;
     }
 
@@ -219,6 +217,7 @@ public class BattleRound {
             roundDetailDef = roundDetail.build();
         }
     }
+
 
     @Override
     public String toString() {

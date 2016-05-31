@@ -52,7 +52,8 @@ public class MilitaryProcess extends KHttpMessageProcess {
 		
 		int troopWeight = battleLogic.getTroopWeight(troopInfo);
 		
-		if(csMilitaryAction.getShipNum() > shipLogic.getFreeShip(player.getPlayerId())){
+		if(csMilitaryAction.getShipNum() > shipLogic.getFreeShip(player.getPlayerId())
+				|| csMilitaryAction.getShipNum() < Math.ceil(troopWeight/500d)){
 			builder.setMessageCode(MessageCode.NOT_ENOUGH_TRANSPORTATION);
 			builder.setScMilitaryAction(scMilitaryAction);
 			httpMessageManager.send(builder);
@@ -66,7 +67,7 @@ public class MilitaryProcess extends KHttpMessageProcess {
 			httpMessageManager.send(builder);
 		}
 		
-		battleLogic.removeTroopFromCity(troopInfo);
+		battleLogic.removeTroopFromCity(player.getPlayerId(), csMilitaryAction.getSourceCityId(), troopInfo);
 		
 		TransportTask.Builder task = TransportTask.newBuilder();
 		task.setType(GameActionType.BATTLE);

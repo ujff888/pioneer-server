@@ -7,15 +7,11 @@ import cn.litgame.wargame.core.auto.GameProtos.CSBattleList;
 import cn.litgame.wargame.core.auto.GameProtos.CSCancelProductionTroop;
 import cn.litgame.wargame.core.auto.GameProtos.CSDisbandTroop;
 import cn.litgame.wargame.core.auto.GameProtos.CSProductionTroop;
-import cn.litgame.wargame.core.auto.GameProtos.CSRoundDetail;
-import cn.litgame.wargame.core.auto.GameProtos.CSRoundList;
 import cn.litgame.wargame.core.auto.GameProtos.MessageBody;
 import cn.litgame.wargame.core.auto.GameProtos.SCBattleList;
 import cn.litgame.wargame.core.auto.GameProtos.SCCancelProductionTroop;
 import cn.litgame.wargame.core.auto.GameProtos.SCDisbandTroop;
 import cn.litgame.wargame.core.auto.GameProtos.SCProductionTroop;
-import cn.litgame.wargame.core.auto.GameProtos.SCRoundDetail;
-import cn.litgame.wargame.core.auto.GameProtos.SCRoundList;
 import cn.litgame.wargame.core.model.Building;
 import cn.litgame.wargame.core.model.City;
 import cn.litgame.wargame.core.model.Troop;
@@ -110,21 +106,5 @@ public class BattleProcess extends KHttpMessageProcess{
 		builder.setScBattleList(scBattleList);
 		httpMessageManager.send(builder);
 		
-	}
-
-	public void roundList(CSRoundList csRoundList) {
-		MessageBody.Builder builder = httpMessageManager.getMessageContentBuilder();
-		SCRoundList.Builder scRoundList = SCRoundList.newBuilder();
-		
-		builder.setScRoundList(scRoundList);
-		httpMessageManager.send(builder);
-	}
-
-	public void roundDetail(CSRoundDetail csRoundDetail) {
-		MessageBody.Builder builder = httpMessageManager.getMessageContentBuilder();
-		SCRoundDetail.Builder scRoundDetail = SCRoundDetail.newBuilder();
-		
-		builder.setScRoundDetail(scRoundDetail);
-		httpMessageManager.send(builder);
 	}
 }

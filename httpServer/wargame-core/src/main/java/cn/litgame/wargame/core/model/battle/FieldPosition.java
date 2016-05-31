@@ -3,8 +3,8 @@ package cn.litgame.wargame.core.model.battle;
 import cn.litgame.wargame.core.auto.GameProtos;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 阵地位置的抽象，包括格子的数目和容量
@@ -12,8 +12,7 @@ import java.util.ArrayList;
  * @author 熊纪元
  *
  */
-public class FieldPosition implements Serializable{
-	private static final long serialVersionUID = 6589758109408896764L;
+public class FieldPosition{
 	//位置的类型
 	private BattleFieldType type;
 	private int capacity;
@@ -33,6 +32,16 @@ public class FieldPosition implements Serializable{
 		}
 	}
 
+	public List<Slot> getSlotsWithTroop() {
+		ArrayList<Slot> slots = new ArrayList<>();
+		
+		for(Slot slot : this.getSlots()){
+			if(!slot.isEmpty())
+				slots.add(slot);
+		}
+		return slots;
+	}
+	
 	public BattleFieldType getType() {
 		return type;
 	}
@@ -64,6 +73,10 @@ public class FieldPosition implements Serializable{
 	public void setSlots(ArrayList<Slot> slots) {
 		this.slots = slots;
 	}
+	
+	public Slot getSlot(int i){
+		return this.slots.get(i);
+	}
 
 	@Override
 	public String toString() {
@@ -74,7 +87,7 @@ public class FieldPosition implements Serializable{
 				", slots=" + slots +
 				'}';
 	}
-
+	
 	public GameProtos.FieldPosition convertToProto() {
 		GameProtos.FieldPosition.Builder builder = GameProtos.FieldPosition.newBuilder();
 		builder.setCapacity(this.capacity);

@@ -398,9 +398,11 @@ public class GameActionLogic {
 				t.setTargetCityName(targetCity.getCityName());
 				t.setSourceCityLevel(sourceCity.getLevel());
 				t.setTargetCityLevel(targetCity.getLevel());
-
+				t.setShipoutTime(t.getLoadingStartTime() + t.getLoadingTime()/1000);
 				t.setTaskId(ga.getActionId());
 				t.setStatus(TransportStatus.valueOf(ga.getActionState()));
+				t.setCreateTime((int) (ga.getCreateTime().getTime()/1000));
+				
 				t.setOverTime((int)((ga.getOverTime().getTime())/1000));
 				
 				tasks.add(t.build());

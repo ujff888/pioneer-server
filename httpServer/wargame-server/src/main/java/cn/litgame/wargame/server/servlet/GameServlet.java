@@ -1,7 +1,7 @@
 package cn.litgame.wargame.server.servlet;
 
-import java.sql.Timestamp;
-import java.util.Calendar;
+import java.io.File;
+import java.io.FileOutputStream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -12,9 +12,10 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import cn.litgame.wargame.core.auto.GameProtos.MessageBody;
-import cn.litgame.wargame.core.model.Player;
 import cn.litgame.wargame.server.logic.HttpMessageManager;
 import cn.litgame.wargame.server.message.KHttpMessageContext;
 import cn.litgame.wargame.server.message.SimpleKHttpMessage;
@@ -93,4 +94,35 @@ public class GameServlet {
 	public static void main(String[] args) {
 		System.out.println(137573173209L % 12);
 	}
+	
+	/**
+	 * {
+		"message":"LuaScriptException: bad argument #3 to '?' (string expected, got nil)stack traceback:	[C]: at 0x45d9b650	[C]: in function '__newindex'	[string "E:/pioneer/client/project/pioneer/Assets/uLua..."]:330: in function 'setText'	[string "E:/pioneer/client/project/pioneer/Assets/uLua..."]:289: in function 'updateView'	[string "E:/pioneer/client/project/pioneer/Assets/uLua..."]:152: in function <[string "E:/pioneer/client/project/pioneer/Assets/uLua..."]:58>",
+		"stacktrace":"LuaInterface.LuaFunction.call (System.Object[] args, System.Type[] returnTypes) (at Assets/uLua/Core/LuaFunction.cs:74)LuaInterface.LuaFunction.Call (System.Object[] args) (at Assets/uLua/Core/LuaFunction.cs:88)LuaScriptMgr.CallLuaFunction (System.String name, System.Object[] args) (at Assets/uLua/Source/Base/LuaScriptMgr.cs:597)CToLuaControl.CallMethod (System.String funcName, System.Object[] args) (at Assets/scripts/pioneerGame/control/CToLuaControl.cs:15)UIView.callLuaMethod (System.String func, System.Object[] args) (at Assets/scripts/pioneerGame/view/UIView.cs:39)UIView.Start () (at Assets/scripts/pioneerGame/view/UIView.cs:21)",
+		"time":"2016-5-30 15:28:3"
+		"device":"Intel(R) Core(TM) i5-4590 CPU @ 3.30GHz (8130 MB)
+		}
+	 * @param bug
+	 * @param file
+	 * @param response
+	 * @throws Exception
+	 */
+	@RequestMapping("/bug.lc")
+	public void bug(@RequestParam("bug") String bug,@RequestParam("fileField") MultipartFile file,HttpServletResponse response) throws Exception{
+		System.out.println("bug=============" + bug);
+		System.out.println("file=============" + file.getBytes().length);
+		if(!file.isEmpty()){
+			String fileName = "e:/test.jpg";
+			File png = new File(fileName);
+			if(png.exists()){
+				png.delete();
+			}
+			
+			FileOutputStream out = new FileOutputStream(fileName);
+			out.write(file.getBytes());
+			out.close();
+		}
+		response.getWriter().print("ok");
+	}
+	
 }

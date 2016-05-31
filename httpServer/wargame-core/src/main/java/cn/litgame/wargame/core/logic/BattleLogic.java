@@ -1,9 +1,9 @@
 package cn.litgame.wargame.core.logic;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Resource;
 
@@ -14,8 +14,10 @@ import cn.litgame.wargame.core.auto.GameGlobalProtos.MessageCode;
 import cn.litgame.wargame.core.auto.GameProtos;
 import cn.litgame.wargame.core.auto.GameProtos.SCProductionTroop;
 import cn.litgame.wargame.core.auto.GameProtos.TroopInfo;
+import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleGround;
 import cn.litgame.wargame.core.auto.GameResProtos.ResTroop;
+import cn.litgame.wargame.core.auto.GameResProtos.TroopType;
 import cn.litgame.wargame.core.logic.queue.GameActionLogic;
 import cn.litgame.wargame.core.mapper.BattleMapper;
 import cn.litgame.wargame.core.mapper.TroopMapper;
@@ -26,6 +28,11 @@ import cn.litgame.wargame.core.model.PlayerTech;
 import cn.litgame.wargame.core.model.Troop;
 import cn.litgame.wargame.core.model.battle.Army;
 import cn.litgame.wargame.core.model.battle.BattleField;
+import cn.litgame.wargame.core.model.battle.BattleRound;
+import cn.litgame.wargame.core.model.battle.Damage;
+import cn.litgame.wargame.core.model.battle.FieldPosition;
+import cn.litgame.wargame.core.model.battle.Slot;
+import cn.litgame.wargame.core.model.battle.unit.BattleUnitAction;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -33,7 +40,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 @Service
 public class BattleLogic {
-
 	@Resource(name = "battleMapper")
 	private BattleMapper battleMapper;
 	
@@ -63,17 +69,14 @@ public class BattleLogic {
 	
 	private final static Logger log = Logger.getLogger(BattleLogic.class);
 	
-	public void initAndSaveBattleField(List<Army> offenceArmys, List<Army> defenceArmys, BattleGround battleGround, boolean isLand, int cityId) {
-		BattleField battleField = new BattleField(offenceArmys, defenceArmys, battleGround, isLand, cityId);
-		String redis_key = "battleField_cache";	
-		
-		
-		Jedis jedis = jedisStoragePool.getResource();
-		try{
-			jedis.set(redis_key.getBytes(), battleField.convertToProto().toByteArray());
-		}finally{
-			jedis.close();
-		}
+	private Map<TroopType, BattleUnitAction> battleUnitActions = new HashMap<>();
+	
+	public void registBattleUnitAction(TroopType key, BattleUnitAction value){
+		this.battleUnitActions.put(key, value);
+	}
+	
+	private BattleUnitAction getBattleUnitActionByTroopType(TroopType type) {
+		return battleUnitActions.get(type);
 	}
 	
 	public BattleField initBattleField(List<Army> offenceArmys, List<Army> defenceArmys, BattleGround battleGround, boolean isLand, int cityId) {
@@ -84,8 +87,8 @@ public class BattleLogic {
 		BattleField field = loadBattleField();
 		while(field.getResult() == GameProtos.BattleResult.FIGHTING){
 			field = loadBattleField();
-			field.nextRound();
-			field.saveRound();
+			this.nextRound(field);
+
 			saveBattleField(field);
 		}
 		return field.getResult();
@@ -337,11 +340,15 @@ public class BattleLogic {
 		return weight;
 	}
 
-	public void removeTroopFromCity(TroopInfo troopInfo) {
+	public void removeTroopFromCity(long playerId, int cityId, TroopInfo troopInfo) {
 		for(GameProtos.Troop gt : troopInfo.getLandTroopList()){
-			Troop t = this.getTroop(gt.getTroopResId());
+			Troop t = this.getCertainTroop(playerId, cityId, gt.getTroopResId());
 			t.setCount(t.getCount() - gt.getCount());
-			this.updateTroop(t);
+			if(t.getCount() <= 0)
+				this.delTroop(t.getTroopId());
+			else
+				this.updateTroop(t);
+			
 		}
 		for(GameProtos.Troop gt : troopInfo.getFlyTroopList()){
 			Troop t = this.getTroop(gt.getTroopResId());
@@ -349,6 +356,10 @@ public class BattleLogic {
 			this.updateTroop(t);
 		}
 		
+	}
+
+	private Troop getCertainTroop(long playerId, int cityId, int troopResId) {
+		return troopMapper.getCertainTroop(playerId, cityId, troopResId);
 	}
 
 	public void increaseTroop(City targetCity, GameProtos.Troop t) {
@@ -375,4 +386,264 @@ public class BattleLogic {
 		}
 	}
 
+	public void nextRound(BattleField battleField){
+		this.initDamage(battleField); 
+		
+		//currentRoundPb = new cn.litgame.wargame.core.model.battle.protoround.BattleRound(currentRoundNum);
+		
+		log.info("双方上场");
+		this.armyInPosition(battleField);		
+		
+		log.info("双方行动");
+		for(BattleFieldType type : BattleField.attackOrder){
+			log.info("进攻方"+type+"位置行动");
+			for(Slot slot : battleField.getFieldPositionsForOffence().get(type).getSlots()){
+				offenceAction(battleField.getFieldPositionsForDefence(), battleField.getFieldPositionsForOffence(), type, battleField, slot);
+			}
+			log.info("防守方"+type+"行动");
+			for(Slot slot : battleField.getFieldPositionsForDefence().get(type).getSlots()){
+				defenceAction(battleField.getFieldPositionsForOffence(), battleField.getFieldPositionsForDefence(), type, battleField, slot);
+			}
+		}
+		
+		log.info("进攻方结算伤害");
+		this.clearField(battleField, BattleField.OFFENCE);
+		log.info("防守方结算伤害");
+		this.clearField(battleField, BattleField.DEFENCE);
+		
+		//this.heal(OFFENCE);
+		//this.heal(DEFENCE);
+		
+		//this.collectRoundInfo(currentRound);
+		this.moraleDown(battleField);
+
+		this.collectRoundInfo(battleField);
+
+		battleField.setCurrentRoundNum(battleField.getCurrentRoundNum()+1);
+		
+		if(!battleField.isOffenceDefeated() && !battleField.isDefenceDefeated()){
+			battleField.setResult(GameProtos.BattleResult.FIGHTING);
+		}else if(battleField.isDefenceDefeated() && !battleField.isOffenceDefeated()){
+			log.info("防守方被击败");
+			battleField.setResult(GameProtos.BattleResult.OFFENCE_WIN);
+		}else if(battleField.isOffenceDefeated() && !battleField.isDefenceDefeated()){
+			log.info("进攻方被击败");
+			battleField.setResult(GameProtos.BattleResult.DEFENCE_WIN);
+		}else{
+			log.info("双方不分胜负");
+			battleField.setResult(GameProtos.BattleResult.EVEN);
+		}
+	}
+
+	private void defenceAction(Map<BattleFieldType, FieldPosition> enemy,
+			Map<BattleFieldType, FieldPosition> self, BattleFieldType type, BattleField battleField,
+			Slot slot) {
+		ResTroop resTroop = configLogic.getResTroop(slot.getResTroopId());
+		if(resTroop != null){
+			BattleUnitAction battleUnitAction = this.getBattleUnitActionByTroopType(resTroop.getTroopType());
+			battleUnitAction.doAction(enemy, self, type, battleField, battleField.getDamageOffence(), slot);
+		}
+	}
+
+	private void offenceAction(Map<BattleFieldType, FieldPosition> enemy,
+			Map<BattleFieldType, FieldPosition> self, BattleFieldType type, BattleField battleField,
+			Slot slot) {
+		ResTroop resTroop = configLogic.getResTroop(slot.getResTroopId());
+		if(resTroop != null){
+			BattleUnitAction battleUnitAction = this.getBattleUnitActionByTroopType(resTroop.getTroopType());
+			battleUnitAction.doAction(enemy, self, type, battleField, battleField.getDamageDefence(), slot);
+		}
+	}
+
+	private void collectRoundInfo(BattleField battleField) {
+		battleField.getCurrentRoundPb().generateRoundInfo(battleField, BattleField.OFFENCE);
+		battleField.getCurrentRoundPb().generateRoundInfo(battleField, BattleField.DEFENCE);
+
+		battleField.getCurrentRoundPb().generateRoundDetail(battleField, BattleField.OFFENCE);
+		battleField.getCurrentRoundPb().generateRoundDetail(battleField, BattleField.DEFENCE);
+		battleField.getRoundHistoryPb().add(battleField.getCurrentRoundPb());
+	}
+
+	private void moraleDown(BattleField battleField) {
+		battleField.setMoraleOff(battleField.getMoraleOff() - battleField.getMoraleDownPercent());
+		battleField.setMoraleDef(battleField.getMoraleDef() - battleField.getMoraleDownPercent());
+
+		int lostOff = battleField.getCurrentRoundPb().getTotalLost(BattleField.OFFENCE);
+		int lostDef = battleField.getCurrentRoundPb().getTotalLost(BattleField.DEFENCE);
+
+		if(lostOff != lostDef){
+			if(lostOff > lostDef)
+				battleField.setMoraleOff(battleField.getMoraleOff() - battleField.getWeakMoraleExtra());
+			else
+				battleField.setMoraleDef(battleField.getMoraleDef() - battleField.getWeakMoraleExtra());
+		}
+	}
+
+	private void clearField(BattleField battleField, boolean isOffence) {
+		//结算伤害
+		Map<BattleFieldType, Damage> damage = isOffence ? battleField.getDamageOffence() : battleField.getDamageDefence();
+		for(Entry<BattleFieldType, Damage> entry : damage.entrySet()){
+			if(!entry.getValue().isEmpty()){
+				takeDamage(battleField, isOffence, entry.getKey(), entry.getValue());
+			}
+		}
+		this.reArange(battleField, isOffence);
+	}
+
+	private void reArange(BattleField battleField, boolean isOffence) {
+		//将没有弹药的远程单位重新分配至后备部队
+		this.removeUnitOutofAmmo(battleField, BattleFieldType.FIELD_REMOTE, TroopType.REMOTE_NO_AMMO, isOffence);
+			
+		//将没有弹药的轰炸单位直接移出战场
+		this.removeUnitOutofAmmo(battleField, BattleFieldType.FIELD_FLY_FIRE, TroopType.FLY_FIRE, isOffence);
+			
+		//将没有弹药的空战单位直接移出战场
+		this.removeUnitOutofAmmo(battleField, BattleFieldType.FIELD_FLY, TroopType.FLY_AIR, isOffence);
+		
+	}
+
+	private void removeUnitOutofAmmo(BattleField battleField, BattleFieldType fieldType, TroopType troopType, boolean isOffence) {
+		FieldPosition position = isOffence ? battleField.getFieldPositionsForOffence().get(fieldType) : battleField.getFieldPositionsForDefence().get(fieldType);
+		for(Slot slot : position.getSlots()){
+			if(slot.getAmount() <= 0){
+				battleField.getArmy(slot, isOffence).addAUnit(troopType, slot);
+				slot.clear();
+			}
+		}
+	}
+
+	private void takeDamage(BattleField battleField, boolean isOffence, BattleFieldType type, Damage damage) {
+		FieldPosition targets = null;
+		targets = isOffence ? battleField.getFieldPositionsForOffence().get(type) : battleField.getFieldPositionsForDefence().get(type);
+		int size = targets.getSlotsWithTroop().size();
+		int count = damage.getUnitCount(); 
+		if(count>size)
+			damage.setUnitCount(size);
+		
+		while(!damage.isEmpty() && damage.getUnitCount() > 0 && !targets.getSlotsWithTroop().isEmpty()){
+			for(Slot bu : targets.getSlotsWithTroop()){
+				int ad = damage.getAvgDamage();
+				bu.takeDamage(ad);
+				log.info("一个单位"+bu.getResTroopId()+"受到"+(ad > bu.getDefense() ? ad-bu.getDefense() : 0)+"点伤害，生命值:"+bu.getHp()+" 类型"+bu.getBattleFieldType());
+				damage.setDamageValue(damage.getDamageValue() - ad);
+				damage.setUnitCount(damage.getUnitCount() - 1);
+			}
+		}
+		removeZeroHpUnitFromField(battleField, type, isOffence);
+	}
+
+	private void removeZeroHpUnitFromField(BattleField battleField, BattleFieldType type, boolean isOffence) {
+		FieldPosition position = isOffence ? battleField.getFieldPositionsForOffence().get(type) : battleField.getFieldPositionsForDefence().get(type);
+		for(Slot slot : position.getSlots()){
+			if(!slot.isEmpty()){
+				int lostNo = slot.getOriginalCount() - slot.getCount();
+				if(lostNo > 0){
+					log.info("一个单位："+slot.getResTroopId()+"数目由"+(slot.getOriginalCount()+lostNo)+"变为"+slot.getOriginalCount());
+				}
+				if(lostNo == slot.getOriginalCount())
+					slot.clear();
+			}
+		}
+//		Iterator<BattleUnit> itr = null;
+//		if(isOffence)
+//			itr = battleField.getTroopsInFieldOffenceByPosition(type).iterator();
+//		else
+//			itr = battleField.getTroopsInFieldDefenceByPosition(type).iterator();
+//		while(itr.hasNext()){
+//			BattleUnit bu = itr.next();
+//			int lostNo = bu.getOriginalCount() - bu.getCount();
+//			if(lostNo > 0){
+//				bu.setOriginalCount(bu.getOriginalCount() - lostNo);
+//				log.info("一个单位："+bu.getTroopId()+"数目由"+(bu.getOriginalCount()+lostNo)+"变为"+bu.getOriginalCount());
+//				//currentRoundPb.addLost(bu.getTroopId(), lostNo, type, isOffence);
+//			}
+//			if(bu.getHp() <= 0){
+//				itr.remove();
+//
+//				FieldPosition fieldPosition = isOffence ?
+//						battleField.getFieldPositionsForOffence().get(type)
+//						: battleField.getFieldPositionsForDefence().get(type);
+//				Slot slot = fieldPosition.getSlots().get(bu.getSlotNum());
+//				slot.remove(bu);
+//				log.info("一个单位退场" + bu.getTroopId() + "," + bu.getBattleFieldType());
+//			}
+//		}
+	}
+
+	private void armyInPosition(BattleField battleField) {
+		log.info("进攻方军队上场");
+		for(BattleFieldType type : BattleField.positionOrder){
+			FieldPosition position = battleField.getFieldPositionsForOffence().get(type);
+			for(Slot slot : position.getSlots()){
+				Slot bunit = null;
+				if(hasNextUnit(battleField.getArmysOffence(), type, slot)){
+					bunit = getNextUnit(battleField.getArmysOffence(), type, slot);
+					if(bunit != null)
+						slot = slot.add(bunit);
+				}
+			}
+		}
+		log.info("防守方军队上场");
+		for(FieldPosition position : battleField.getFieldPositionsForDefence().values()){
+			if(position.getType() == BattleFieldType.FIELD_CLOSE
+					&& battleField.getFieldPositionsForDefence().get(BattleFieldType.FIELD_CLOSE).getSlot(0).isFortificationUnit()){
+				continue;
+			}
+			for(BattleFieldType type : BattleField.positionOrder){
+				for(Slot slot : position.getSlots()){
+					Slot bunit = null;
+					if(hasNextUnit(battleField.getArmysDefence(), type, slot)){
+						bunit = getNextUnit(battleField.getArmysOffence(), type, slot);
+						if(bunit != null)
+							slot = slot.add(bunit);
+					}
+				}
+			}
+		}
+		
+	}
+
+	private Slot getNextUnit(List<Army> armys, BattleFieldType type, Slot slot) {
+		for(Army army : armys){
+			if(army.hasNextUnit(type, slot))
+				return army.getNextUnit(type, slot);
+		}
+		return null;
+	}
+
+	private boolean hasNextUnit(List<Army> armys, BattleFieldType type, Slot slot) {
+		for(Army a : armys) {
+			if(a.hasNextUnit(type, slot))
+				return true;
+		}
+		return false;
+	}
+
+	private void initDamage(BattleField battleField) {
+		battleField.setDamageOffence(new HashMap<>());
+		battleField.setDamageDefence(new HashMap<>());
+		
+		battleField.getDamageOffence().put(BattleFieldType.FIELD_CLOSE, new Damage(0,0));
+		battleField.getDamageOffence().put(BattleFieldType.FIELD_REMOTE, new Damage(0,0));
+		battleField.getDamageOffence().put(BattleFieldType.FIELD_FIRE, new Damage(0,0));
+		battleField.getDamageOffence().put(BattleFieldType.FIELD_SIDE, new Damage(0,0));
+		battleField.getDamageOffence().put(BattleFieldType.FIELD_FLY, new Damage(0,0));
+		battleField.getDamageOffence().put(BattleFieldType.FIELD_FLY_FIRE, new Damage(0,0));
+		battleField.getDamageOffence().put(BattleFieldType.FIELD_SUPPORT, new Damage(0,0));
+		
+		battleField.getDamageDefence().put(BattleFieldType.FIELD_CLOSE, new Damage(0,0));
+		battleField.getDamageDefence().put(BattleFieldType.FIELD_REMOTE, new Damage(0,0));
+		battleField.getDamageDefence().put(BattleFieldType.FIELD_FIRE, new Damage(0,0));
+		battleField.getDamageDefence().put(BattleFieldType.FIELD_SIDE, new Damage(0,0));
+		battleField.getDamageDefence().put(BattleFieldType.FIELD_FLY, new Damage(0,0));
+		battleField.getDamageDefence().put(BattleFieldType.FIELD_FLY_FIRE, new Damage(0,0));
+		battleField.getDamageDefence().put(BattleFieldType.FIELD_SUPPORT, new Damage(0,0));		
+	}
+
+	public BattleRound saveRound(BattleField field) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
 }

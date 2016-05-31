@@ -89,6 +89,14 @@ public final class GameResProtos {
      * </pre>
      */
     REMOTE_NO_AMMO(8, 9),
+    /**
+     * <code>FORTIFICATION = 10;</code>
+     *
+     * <pre>
+     *城墙
+     * </pre>
+     */
+    FORTIFICATION(9, 10),
     ;
 
     /**
@@ -163,6 +171,14 @@ public final class GameResProtos {
      * </pre>
      */
     public static final int REMOTE_NO_AMMO_VALUE = 9;
+    /**
+     * <code>FORTIFICATION = 10;</code>
+     *
+     * <pre>
+     *城墙
+     * </pre>
+     */
+    public static final int FORTIFICATION_VALUE = 10;
 
 
     public final int getNumber() { return value; }
@@ -178,6 +194,7 @@ public final class GameResProtos {
         case 7: return LOGISTICS;
         case 8: return NPC;
         case 9: return REMOTE_NO_AMMO;
+        case 10: return FORTIFICATION;
         default: return null;
       }
     }
@@ -31620,24 +31637,24 @@ public final class GameResProtos {
       "\030\016 \003(\0132\032.litgame.game.ResTransport\022/\n\014re" +
       "sShopShelf\030\017 \003(\0132\031.litgame.game.ResShopI" +
       "tem\022&\n\007resItem\030\020 \003(\0132\025.litgame.game.ResI" +
-      "tem*\177\n\tTroopType\022\n\n\006REMOTE\020\001\022\t\n\005LIGHT\020\002\022",
-      "\n\n\006WEIGHT\020\003\022\013\n\007FLY_AIR\020\004\022\014\n\010FLY_FIRE\020\005\022\010" +
-      "\n\004FIRE\020\006\022\r\n\tLOGISTICS\020\007\022\007\n\003NPC\020\010\022\022\n\016REMO" +
-      "TE_NO_AMMO\020\t*\254\001\n\017BattleFieldType\022\021\n\rFIEL" +
-      "D_SUPPORT\020\001\022\022\n\016FIELD_FLY_FIRE\020\002\022\016\n\nFIELD" +
-      "_FIRE\020\003\022\020\n\014FIELD_REMOTE\020\004\022\017\n\013FIELD_CLOSE" +
-      "\020\005\022\016\n\nFIELD_SIDE\020\006\022\r\n\tFIELD_FLY\020\007\022\020\n\014FIE" +
-      "LD_BACKUP\020\010\022\016\n\nFIELD_MAIN\020\t*M\n\rShopShelf" +
-      "Type\022\007\n\003HOT\020\001\022\t\n\005INCRE\020\002\022\r\n\tWAR_SHELF\020\003\022" +
-      "\r\n\tRESOURCES\020\004\022\n\n\006OTHERS\020\005*E\n\014ResourceTy" +
-      "pe\022\010\n\004FOOD\020\001\022\t\n\005METAL\020\002\022\t\n\005STONE\020\003\022\013\n\007CR",
-      "YSTAL\020\004\022\010\n\004WOOD\020\005*?\n\014LandBaseType\022\007\n\003one" +
-      "\020\001\022\007\n\003two\020\002\022\t\n\005three\020\003\022\010\n\004four\020\004\022\010\n\004five" +
-      "\020\005*O\n\006Totems\022\007\n\003HFS\020\001\022\007\n\003HDS\020\002\022\007\n\003DME\020\003\022" +
-      "\007\n\003YDN\020\004\022\007\n\003AMS\020\005\022\007\n\003ARS\020\006\022\007\n\003PSD\020\007\022\006\n\002N" +
-      "L\020\010*+\n\010LandType\022\007\n\003air\020\001\022\010\n\004land\020\002\022\014\n\010ac" +
-      "tivity\020\003B/\n\034cn.litgame.wargame.core.auto" +
-      "B\rGameResProtosH\001"
+      "tem*\222\001\n\tTroopType\022\n\n\006REMOTE\020\001\022\t\n\005LIGHT\020\002",
+      "\022\n\n\006WEIGHT\020\003\022\013\n\007FLY_AIR\020\004\022\014\n\010FLY_FIRE\020\005\022" +
+      "\010\n\004FIRE\020\006\022\r\n\tLOGISTICS\020\007\022\007\n\003NPC\020\010\022\022\n\016REM" +
+      "OTE_NO_AMMO\020\t\022\021\n\rFORTIFICATION\020\n*\254\001\n\017Bat" +
+      "tleFieldType\022\021\n\rFIELD_SUPPORT\020\001\022\022\n\016FIELD" +
+      "_FLY_FIRE\020\002\022\016\n\nFIELD_FIRE\020\003\022\020\n\014FIELD_REM" +
+      "OTE\020\004\022\017\n\013FIELD_CLOSE\020\005\022\016\n\nFIELD_SIDE\020\006\022\r" +
+      "\n\tFIELD_FLY\020\007\022\020\n\014FIELD_BACKUP\020\010\022\016\n\nFIELD" +
+      "_MAIN\020\t*M\n\rShopShelfType\022\007\n\003HOT\020\001\022\t\n\005INC" +
+      "RE\020\002\022\r\n\tWAR_SHELF\020\003\022\r\n\tRESOURCES\020\004\022\n\n\006OT" +
+      "HERS\020\005*E\n\014ResourceType\022\010\n\004FOOD\020\001\022\t\n\005META",
+      "L\020\002\022\t\n\005STONE\020\003\022\013\n\007CRYSTAL\020\004\022\010\n\004WOOD\020\005*?\n" +
+      "\014LandBaseType\022\007\n\003one\020\001\022\007\n\003two\020\002\022\t\n\005three" +
+      "\020\003\022\010\n\004four\020\004\022\010\n\004five\020\005*O\n\006Totems\022\007\n\003HFS\020" +
+      "\001\022\007\n\003HDS\020\002\022\007\n\003DME\020\003\022\007\n\003YDN\020\004\022\007\n\003AMS\020\005\022\007\n" +
+      "\003ARS\020\006\022\007\n\003PSD\020\007\022\006\n\002NL\020\010*+\n\010LandType\022\007\n\003a" +
+      "ir\020\001\022\010\n\004land\020\002\022\014\n\010activity\020\003B/\n\034cn.litga" +
+      "me.wargame.core.autoB\rGameResProtosH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

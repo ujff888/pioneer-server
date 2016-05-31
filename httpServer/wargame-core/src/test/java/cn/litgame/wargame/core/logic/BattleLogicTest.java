@@ -26,13 +26,13 @@ public class BattleLogicTest {
 	ConfigLogic configLogic = context.getBean(ConfigLogic.class);
 	JedisPool pool = (JedisPool) context.getBean("jedisStoragePool");
 	
-	@Before
+	//@Before
 	public void init(){
 		configLogic.loadConfig(this.getClass().getResource("/pb.bytes").getPath());
 	}
 
 	
-	@Test
+	//@Test
 	public void test(){
 		BattleGround bg = configLogic.getBattleGround(1, 1);
 		
@@ -120,58 +120,13 @@ public class BattleLogicTest {
 		
 		armysDefence.add(b);
 		//armysDefence.add(b1);
-//		BattleField field = new BattleField(armysOffence, armysDefence, bg, BattleField.LAND, 1);
-//		GameProtos.BattleField fieldPb = field.convertToProto();
-//
-//		String redis_key = "battleField_cache";
-//		try(Jedis jedis = pool.getResource()){
-//			jedis.set(redis_key.getBytes(), field.convertToProto().toByteArray());
-//			byte[] bytes = jedis.get(redis_key.getBytes());
-//			byte[] abytes = fieldPb.toByteArray();
-//			Assert.assertEquals(bytes.length, abytes.length);
-//			for(int i=0;i<bytes.length;i++){
-//				Assert.assertEquals(bytes[i], abytes[i]);
-//			}
-//			fieldPb = GameProtos.BattleField.parseFrom(bytes);
-//		} catch (InvalidProtocolBufferException e) {
-//			e.printStackTrace();
-//		}
 
-//		BattleField field_alt = new BattleField(fieldPb);
-//		log.info("================================================================================");
-//		log.info(field);
-//		log.info("================================================================================");
-//		log.info(field_alt);
-//		log.info("================================================================================");
-//		log.info(fieldPb);
 
-		battleLogic.initAndSaveBattleField(armysOffence, armysDefence, bg, BattleField.LAND, 1);
+		BattleField field = battleLogic.initBattleField(armysOffence, armysDefence, bg, BattleField.LAND, 1);
+		battleLogic.saveBattleField(field);
 		GameProtos.BattleResult result = battleLogic.fight();
 		Assert.assertEquals(GameProtos.BattleResult.DEFENCE_WIN, result);
-	}
-	
-
-	public static void main(String[] args){
-//		List<Entry> strs = new ArrayList<>();
-//		strs.add(new Entry(1,"hello"));
-//		strs.add(new Entry(2,"world"));
-//
-//		Entry temp = strs.get(0);
-//		temp.i = 111;
-//		temp.value = "new value";
-//		System.out.println(strs);
-//		System.out.println(strs.indexOf(temp));
-//
-//		for(Entry e : strs){
-//			if(e.i == 111){
-//				e.value = "value-alt";
-//				int index = strs.indexOf(e);
-//				strs.remove(index);
-//				System.out.println(e);
-//			}
-//		}
-//
-//		System.out.println(strs);
+		log.info(battleLogic.loadBattleField());
 	}
 }
 class Entry{

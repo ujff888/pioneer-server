@@ -52,8 +52,8 @@ public class BattleRoundActionEvent extends GameActionEvent{
 	public void doLogic(GameAction gameAction, long nowTime) throws InvalidProtocolBufferException {
 		if(gameAction.getActionState() == TransportStatus.PK_VALUE) {
 			if(field.getResult() == GameProtos.BattleResult.FIGHTING){
-				field.nextRound();
-				BattleRound round = field.saveRound();
+				battleLogic.nextRound(field);
+				BattleRound round = battleLogic.saveRound(field);
 				
 				this.saveBattle(round);
 				this.updateGameAction(gameAction);

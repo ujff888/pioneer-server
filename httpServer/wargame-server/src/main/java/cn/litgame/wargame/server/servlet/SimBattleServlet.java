@@ -13,13 +13,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import cn.litgame.wargame.core.auto.GameProtos.BattleResult;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleGround;
 import cn.litgame.wargame.core.logic.BattleLogic;
 import cn.litgame.wargame.core.logic.ConfigLogic;
 import cn.litgame.wargame.core.model.battle.Army;
 import cn.litgame.wargame.core.model.battle.BattleField;
 import cn.litgame.wargame.core.model.battle.BattleRound;
-import cn.litgame.wargame.core.model.battle.troop.BattleTroop;
+import cn.litgame.wargame.core.model.BattleTroop;
 import junit.framework.Assert;
 
 @Controller
@@ -119,7 +120,8 @@ public class SimBattleServlet {
 			
 			bt2012.setCount(o2012);
 			offence.add(bt2012);
-
+			
+			Army aaa = new Army(1L, 1, offence);
 			Army a = new Army(1L, 1, offence);
 
 			
@@ -165,19 +167,18 @@ public class SimBattleServlet {
 			
 			armysDefence.add(b);
 			
-			battleLogic.initAndSaveBattleField(armysOffence, armysDefence, bg, BattleField.LAND, 1);
-			
+			battleLogic.saveBattleField(battleLogic.initBattleField(armysOffence, armysDefence, bg, BattleField.LAND, 1));
 			BattleField field = battleLogic.loadBattleField();
 			field.setMoraleDownPercent(moraleDownPercent/100);
 			field.setWeakMoraleExtra(weakMoraleExtra/100);
 			battleLogic.saveBattleField(field);
 			int i = 1;
 			List<BattleRound> roundList = new ArrayList<>();
-			while(field.getResult() == 0){
+			while(field.getResult() == BattleResult.FIGHTING){
 				sb.append("第"+i+"回合");
 				field = battleLogic.loadBattleField();
-				field.nextRound();
-				roundList.add(field.saveRound());
+				battleLogic.nextRound(field);
+				roundList.add(battleLogic.saveRound(field));
 				battleLogic.saveBattleField(field);
 				i++;
 			}

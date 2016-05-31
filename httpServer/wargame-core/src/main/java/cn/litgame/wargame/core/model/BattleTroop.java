@@ -4,8 +4,7 @@ import cn.litgame.wargame.core.auto.GameResProtos.ResTroop;
 
 import java.io.Serializable;
 
-public class BattleTroop implements Serializable {
-	private static final long serialVersionUID = -3580940326778807383L;
+public class BattleTroop {
 	private int count;
 	private ResTroop resTroop;
 	

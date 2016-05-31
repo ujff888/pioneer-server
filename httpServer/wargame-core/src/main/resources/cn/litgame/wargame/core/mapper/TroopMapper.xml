@@ -46,5 +46,10 @@
 				select * from troop where cityId = #{cityId}
 			]]>
 	</select>
+	<select id="getCertainTroop" resultMap="troopMap">
+			<![CDATA[
+				select * from troop where playerId=#{0} and cityId=#{1} and troopResId=#{2};
+			]]>
+	</select>
 	
 </mapper>

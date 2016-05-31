@@ -12,5 +12,5 @@ public interface TroopMapper {
 	public List<Troop> getTroopsByPlayerId(long playerId);
 	public List<Troop> getTroopsByCityIdAndType(int cityId,int troopType);
 	public List<Troop> getTroopsByCityId(int cityId);
-	
+	public Troop getCertainTroop(long playerId, int cityId, int troopResId);
 }

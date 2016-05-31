@@ -1,16 +1,19 @@
 package cn.litgame.wargame.core.model.battle;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import cn.litgame.wargame.core.auto.GameProtos;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
 import cn.litgame.wargame.core.auto.GameResProtos.ResTroop;
 import cn.litgame.wargame.core.auto.GameResProtos.TroopType;
 import cn.litgame.wargame.core.logic.ConfigLogic;
+import cn.litgame.wargame.core.logic.SpringContext;
 import cn.litgame.wargame.core.model.BattleTroop;
-import cn.litgame.wargame.core.model.battle.unit.*;
-
-import javax.annotation.Resource;
-import java.io.Serializable;
-import java.util.*;
 
 /**
  * 军队的抽象
@@ -18,15 +21,8 @@ import java.util.*;
  * @author 熊纪元
  *
  */
-public class Army implements Serializable{
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3516389017448464560L;
-
-	@Resource(name = "configLogic")
-	private static ConfigLogic configLogic;
+public class Army{
+	private static ConfigLogic configLogic = SpringContext.getBean(ConfigLogic.class);
 	
 	private long playerId;
 	private int cityId;
@@ -179,7 +175,7 @@ public class Army implements Serializable{
 	 * @param position
 	 * @return
 	 */
-	boolean hasNextUnit(BattleFieldType position, Slot slot) {
+	public boolean hasNextUnit(BattleFieldType position, Slot slot) {
 		if(slot.isFull())
 			return false;
 		switch(position){
@@ -286,9 +282,9 @@ public class Army implements Serializable{
 		}
 	}
 
-	BattleUnit getNextUnit(BattleFieldType position, Slot slot) {
+	public Slot getNextUnit(BattleFieldType position, Slot slot) {
 		List<BattleTroop> backups = null;
-		BattleUnit nextUnit = null;
+		Slot nextUnit = null;
 		int count;
 		if(!this.hasNextUnit(position, slot) || slot.isFull())
 			return nextUnit;
@@ -306,7 +302,8 @@ public class Army implements Serializable{
 					if(temp.getCount() == 0)
 						backups.remove(temp);
 					
-					nextUnit = new FlyFireBattleUnit(temp, count, this.playerId, this.cityId);
+					nextUnit = new Slot(temp, count, this.playerId, this.cityId);
+					nextUnit = nextUnit.add(slot);
 					return nextUnit;
 				}else{
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -317,8 +314,8 @@ public class Army implements Serializable{
 							if(bt.getCount() == 0)
 								backups.remove(bt);
 
-							nextUnit = new FlyFireBattleUnit(bt, count, this.playerId, this.cityId);
-							return nextUnit;
+							nextUnit = new Slot(bt, count, this.playerId, this.cityId);
+							nextUnit = nextUnit.add(slot);
 						}
 					}
 				}
@@ -336,7 +333,8 @@ public class Army implements Serializable{
 					if(temp.getCount() == 0)
 						backups.remove(temp);
 					
-					nextUnit = new RemoteBattleUnit(temp, count, this.playerId, this.cityId);
+					nextUnit = new Slot(temp, count, this.playerId, this.cityId);
+					nextUnit = nextUnit.add(slot);
 					return nextUnit;
 				}else{
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -347,8 +345,8 @@ public class Army implements Serializable{
 							if(bt.getCount() == 0)
 								backups.remove(bt);
 
-							nextUnit = new RemoteBattleUnit(bt, count, this.playerId, this.cityId);
-							return nextUnit;
+							nextUnit = new Slot(bt, count, this.playerId, this.cityId);
+							nextUnit = nextUnit.add(slot);
 						}
 					}
 				}
@@ -366,7 +364,8 @@ public class Army implements Serializable{
 					if(temp.getCount() == 0)
 						backups.remove(temp);
 					
-					nextUnit = new LightBattleUnit(temp, count, this.playerId, this.cityId);
+					nextUnit = new Slot(temp, count, this.playerId, this.cityId);
+					nextUnit = nextUnit.add(slot);
 					return nextUnit;
 				}else{
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -377,7 +376,8 @@ public class Army implements Serializable{
 							if(bt.getCount() == 0)
 								backups.remove(bt);
 
-							nextUnit = new LightBattleUnit(bt, count, this.playerId, this.cityId);
+							nextUnit = new Slot(bt, count, this.playerId, this.cityId);
+							nextUnit = nextUnit.add(slot);
 							return nextUnit;
 						}
 					}
@@ -396,7 +396,8 @@ public class Army implements Serializable{
 					if(temp.getCount() == 0)
 						backups.remove(temp);
 					
-					nextUnit = new FlyAirBattleUnit(temp, count, this.playerId, this.cityId);
+					nextUnit = new Slot(temp, count, this.playerId, this.cityId);
+					nextUnit = nextUnit.add(slot);
 					return nextUnit;
 				}else{
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -407,7 +408,8 @@ public class Army implements Serializable{
 							if(bt.getCount() == 0)
 								backups.remove(bt);
 
-							nextUnit = new FlyAirBattleUnit(bt, count, this.playerId, this.cityId);
+							nextUnit = new Slot(bt, count, this.playerId, this.cityId);
+							nextUnit = nextUnit.add(slot);
 							return nextUnit;
 						}
 					}
@@ -426,7 +428,8 @@ public class Army implements Serializable{
 					if(temp.getCount() == 0)
 						backups.remove(temp);
 					
-					nextUnit = new FireBattleUnit(temp, count, this.playerId, this.cityId);
+					nextUnit = new Slot(temp, count, this.playerId, this.cityId);
+					nextUnit = nextUnit.add(slot);
 					return nextUnit;
 				}else{
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -437,7 +440,8 @@ public class Army implements Serializable{
 							if(bt.getCount() == 0)
 								backups.remove(bt);
 
-							nextUnit = new FireBattleUnit(bt, count, this.playerId, this.cityId);
+							nextUnit = new Slot(bt, count, this.playerId, this.cityId);
+							nextUnit = nextUnit.add(slot);
 							return nextUnit;
 						}
 					}
@@ -455,7 +459,8 @@ public class Army implements Serializable{
 					if(temp.getCount() == 0)
 						backups.remove(temp);
 					
-					nextUnit = new WeightBattleUnit(temp, count, this.playerId, this.cityId);
+					nextUnit = new Slot(temp, count, this.playerId, this.cityId);
+					nextUnit = nextUnit.add(slot);
 					return nextUnit;
 				}else{
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -466,7 +471,8 @@ public class Army implements Serializable{
 							if(bt.getCount() == 0)
 								backups.remove(bt);
 
-							nextUnit = new WeightBattleUnit(bt, count, this.playerId, this.cityId);
+							nextUnit = new Slot(bt, count, this.playerId, this.cityId);
+							nextUnit = nextUnit.add(slot);
 							return nextUnit;
 						}
 					}
@@ -482,7 +488,8 @@ public class Army implements Serializable{
 						if(temp.getCount() == 0)
 							backups.remove(temp);
 						
-						nextUnit = new LightBattleUnit(temp, count, this.playerId, this.cityId);
+						nextUnit = new Slot(temp, count, this.playerId, this.cityId);
+						nextUnit = nextUnit.add(slot);
 						return nextUnit;
 					}else{
 						for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -493,7 +500,8 @@ public class Army implements Serializable{
 								if(bt.getCount() == 0)
 									backups.remove(bt);
 								
-								nextUnit = new LightBattleUnit(bt, count, this.playerId, this.cityId);
+								nextUnit = new Slot(bt, count, this.playerId, this.cityId);
+								nextUnit = nextUnit.add(slot);
 								return nextUnit;
 							}
 						}
@@ -508,7 +516,8 @@ public class Army implements Serializable{
 						if(temp.getCount() == 0)
 							backups.remove(temp);
 						
-						nextUnit = new RemoteBattleUnit(temp, count, this.playerId, this.cityId);
+						nextUnit = new Slot(temp, count, this.playerId, this.cityId);
+						nextUnit = nextUnit.add(slot);
 						return nextUnit;
 					}else{
 						for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
@@ -519,7 +528,8 @@ public class Army implements Serializable{
 								if(bt.getCount() == 0)
 									backups.remove(bt);
 								
-								nextUnit = new RemoteBattleUnit(bt, count, this.playerId, this.cityId);
+								nextUnit = new Slot(bt, count, this.playerId, this.cityId);
+								nextUnit = nextUnit.add(slot);
 								return nextUnit;
 							}
 						}
@@ -535,10 +545,10 @@ public class Army implements Serializable{
 		}
 	}
 
-	void addAUnit(TroopType troopType, BattleUnit bu){
+	public void addAUnit(TroopType troopType, Slot bu){
 		List<BattleTroop> troops = this.getBackupBattleTroopsByType(troopType);
 		for(BattleTroop bt : troops){
-			if(bt.getResTroop().getId() == bu.getTroopId()){
+			if(bt.getResTroop().getId() == bu.getResTroopId()){
 				bt.setCount(bt.getCount() + bu.getCount());
 				return;
 			}
@@ -546,7 +556,7 @@ public class Army implements Serializable{
 		
 		BattleTroop temp = new BattleTroop();
 		temp.setCount(bu.getCount());
-		ResTroop.Builder res = configLogic.getResTroop(bu.getTroopId()).toBuilder();
+		ResTroop.Builder res = configLogic.getResTroop(bu.getResTroopId()).toBuilder();
 		res.setAttack(bu.getAttack()).setAttack2(bu.getAttack2()).setDefense(bu.getDefense());
 		temp.setResTroop(res.build());
 		

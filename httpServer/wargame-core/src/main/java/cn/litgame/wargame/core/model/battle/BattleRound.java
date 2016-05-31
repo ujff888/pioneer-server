@@ -20,8 +20,7 @@ import java.util.*;
  * @author 熊纪元
  *
  */
-public class BattleRound implements Serializable {
-	private static final long serialVersionUID = 5067244562806620768L;
+public class BattleRound{
 	private static final Logger log = Logger.getLogger(BattleRound.class);
 
 	private int seqNo;//回合数
