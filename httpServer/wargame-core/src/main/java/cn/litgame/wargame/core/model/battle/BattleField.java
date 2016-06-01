@@ -5,12 +5,10 @@ import cn.litgame.wargame.core.auto.GameProtos.BattleDetail;
 import cn.litgame.wargame.core.auto.GameProtos.SimpleBattleInfo;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleGround;
-import cn.litgame.wargame.core.auto.GameResProtos.TroopType;
 import cn.litgame.wargame.core.logic.*;
 import cn.litgame.wargame.core.model.Building;
 import cn.litgame.wargame.core.model.City;
 import cn.litgame.wargame.core.model.Player;
-import cn.litgame.wargame.core.model.battle.unit.*;
 import org.apache.log4j.Logger;
 import org.kriver.core.common.KeyUtil;
 
@@ -209,6 +207,13 @@ public class BattleField{
 
 	public HashMap<BattleFieldType, FieldPosition> getFieldPositionsForOffence() {
 		return fieldPositionsForOffence;
+	}
+
+	public FieldPosition getFieldPositionByType(boolean isOffence, BattleFieldType type){
+		if(isOffence)
+			return this.fieldPositionsForOffence.get(type);
+		else
+			return this.fieldPositionsForDefence.get(type);
 	}
 
 	public void setFieldPositionsForOffence(HashMap<BattleFieldType, FieldPosition> fieldPositionsForOffence) {

@@ -1,15 +1,5 @@
 package cn.litgame.wargame.core.logic;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.annotation.Resource;
-
-import org.apache.log4j.Logger;
-import org.springframework.stereotype.Service;
-
 import cn.litgame.wargame.core.auto.GameGlobalProtos.MessageCode;
 import cn.litgame.wargame.core.auto.GameProtos;
 import cn.litgame.wargame.core.auto.GameProtos.SCProductionTroop;
@@ -21,22 +11,23 @@ import cn.litgame.wargame.core.auto.GameResProtos.TroopType;
 import cn.litgame.wargame.core.logic.queue.GameActionLogic;
 import cn.litgame.wargame.core.mapper.BattleMapper;
 import cn.litgame.wargame.core.mapper.TroopMapper;
-import cn.litgame.wargame.core.model.Building;
-import cn.litgame.wargame.core.model.City;
-import cn.litgame.wargame.core.model.GameAction;
-import cn.litgame.wargame.core.model.PlayerTech;
-import cn.litgame.wargame.core.model.Troop;
-import cn.litgame.wargame.core.model.battle.Army;
-import cn.litgame.wargame.core.model.battle.BattleField;
-import cn.litgame.wargame.core.model.battle.BattleRound;
-import cn.litgame.wargame.core.model.battle.Damage;
-import cn.litgame.wargame.core.model.battle.FieldPosition;
-import cn.litgame.wargame.core.model.battle.Slot;
+import cn.litgame.wargame.core.model.*;
+import cn.litgame.wargame.core.model.battle.*;
 import cn.litgame.wargame.core.model.battle.unit.BattleUnitAction;
+import com.google.protobuf.InvalidProtocolBufferException;
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-import com.google.protobuf.InvalidProtocolBufferException;
+import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 @Service
 public class BattleLogic {
@@ -83,19 +74,18 @@ public class BattleLogic {
 		return new BattleField(offenceArmys, defenceArmys, battleGround, isLand, cityId);
 	}
 	
-	public GameProtos.BattleResult fight(){
-		BattleField field = loadBattleField();
+	public GameProtos.BattleResult fight(BattleField field){
+		//BattleField field = loadBattleField();
 		while(field.getResult() == GameProtos.BattleResult.FIGHTING){
-			field = loadBattleField();
+			//field = loadBattleField();
 			this.nextRound(field);
-
-			saveBattleField(field);
+			//saveBattleField(field);
 		}
 		return field.getResult();
 	}
 	
 	public BattleField loadBattleField() {
-		String redis_key = "battleField_cache";	
+		String redis_key = "battleField_cache";
 		BattleField field = null;
 		Jedis jedis = jedisStoragePool.getResource();
 		try{
@@ -114,8 +104,8 @@ public class BattleLogic {
 	}
 	
 	public void saveBattleField(BattleField battleField) {
-		String redis_key = "battleField_cache";	
-		
+		String redis_key = "battleField_cache";
+
 		try(Jedis jedis = jedisStoragePool.getResource()){
 			jedis.set(redis_key.getBytes(), battleField.convertToProto().toByteArray());
 		}
@@ -153,7 +143,7 @@ public class BattleLogic {
 	}
 	/**
 	 * 获取某个城市的所有部队
-	 * @param cityId
+	 * @param city
 	 * @return
 	 */
 	public List<Troop> getTroopsByCityId(City city){
@@ -168,8 +158,7 @@ public class BattleLogic {
 	
 	/**
 	 * 获取城市里的陆军
-	 * @param cityId
-	 * @param troopType
+	 * @param city
 	 * @param flush 是否刷新生产中的队列
 	 * @return
 	 */
@@ -183,7 +172,7 @@ public class BattleLogic {
 	
 	/**
 	 * 获取城市里的所有空军
-	 * @param cityId
+	 * @param city
 	 * @return
 	 * 
 	 */
@@ -222,7 +211,7 @@ public class BattleLogic {
 	 * 生产部队的函数，TODO://需要处理被占领后生成资源消耗加倍的逻辑
 	 * @param city
 	 * @param troops
-	 * @param troopType
+	 * @param position
 	 * @param builder
 	 * @return
 	 */
@@ -397,11 +386,11 @@ public class BattleLogic {
 		log.info("双方行动");
 		for(BattleFieldType type : BattleField.attackOrder){
 			log.info("进攻方"+type+"位置行动");
-			for(Slot slot : battleField.getFieldPositionsForOffence().get(type).getSlots()){
+			for(Slot slot : battleField.getFieldPositionByType(BattleField.OFFENCE, type).getSlots()){
 				offenceAction(battleField.getFieldPositionsForDefence(), battleField.getFieldPositionsForOffence(), type, battleField, slot);
 			}
 			log.info("防守方"+type+"行动");
-			for(Slot slot : battleField.getFieldPositionsForDefence().get(type).getSlots()){
+			for(Slot slot : battleField.getFieldPositionByType(BattleField.DEFENCE, type).getSlots()){
 				defenceAction(battleField.getFieldPositionsForOffence(), battleField.getFieldPositionsForDefence(), type, battleField, slot);
 			}
 		}
@@ -503,7 +492,7 @@ public class BattleLogic {
 	}
 
 	private void removeUnitOutofAmmo(BattleField battleField, BattleFieldType fieldType, TroopType troopType, boolean isOffence) {
-		FieldPosition position = isOffence ? battleField.getFieldPositionsForOffence().get(fieldType) : battleField.getFieldPositionsForDefence().get(fieldType);
+		FieldPosition position = battleField.getFieldPositionByType(isOffence, fieldType);
 		for(Slot slot : position.getSlots()){
 			if(slot.getAmount() <= 0){
 				battleField.getArmy(slot, isOffence).addAUnit(troopType, slot);
@@ -513,15 +502,15 @@ public class BattleLogic {
 	}
 
 	private void takeDamage(BattleField battleField, boolean isOffence, BattleFieldType type, Damage damage) {
-		FieldPosition targets = null;
-		targets = isOffence ? battleField.getFieldPositionsForOffence().get(type) : battleField.getFieldPositionsForDefence().get(type);
-		int size = targets.getSlotsWithTroop().size();
+		FieldPosition position = battleField.getFieldPositionByType(isOffence, type);
+		List<Slot> targets = position.getSlotsWithTroop();
+		int size = targets.size();
 		int count = damage.getUnitCount(); 
 		if(count>size)
 			damage.setUnitCount(size);
 		
-		while(!damage.isEmpty() && damage.getUnitCount() > 0 && !targets.getSlotsWithTroop().isEmpty()){
-			for(Slot bu : targets.getSlotsWithTroop()){
+		while(!damage.isEmpty() && damage.getUnitCount() > 0 && !targets.isEmpty()){
+			for(Slot bu : targets){
 				int ad = damage.getAvgDamage();
 				bu.takeDamage(ad);
 				log.info("一个单位"+bu.getResTroopId()+"受到"+(ad > bu.getDefense() ? ad-bu.getDefense() : 0)+"点伤害，生命值:"+bu.getHp()+" 类型"+bu.getBattleFieldType());
@@ -533,47 +522,25 @@ public class BattleLogic {
 	}
 
 	private void removeZeroHpUnitFromField(BattleField battleField, BattleFieldType type, boolean isOffence) {
-		FieldPosition position = isOffence ? battleField.getFieldPositionsForOffence().get(type) : battleField.getFieldPositionsForDefence().get(type);
+		FieldPosition position = battleField.getFieldPositionByType(isOffence, type);
 		for(Slot slot : position.getSlots()){
 			if(!slot.isEmpty()){
 				int lostNo = slot.getOriginalCount() - slot.getCount();
 				if(lostNo > 0){
 					log.info("一个单位："+slot.getResTroopId()+"数目由"+(slot.getOriginalCount()+lostNo)+"变为"+slot.getOriginalCount());
+					slot.subtract(lostNo);
 				}
 				if(lostNo == slot.getOriginalCount())
 					slot.clear();
 			}
 		}
-//		Iterator<BattleUnit> itr = null;
-//		if(isOffence)
-//			itr = battleField.getTroopsInFieldOffenceByPosition(type).iterator();
-//		else
-//			itr = battleField.getTroopsInFieldDefenceByPosition(type).iterator();
-//		while(itr.hasNext()){
-//			BattleUnit bu = itr.next();
-//			int lostNo = bu.getOriginalCount() - bu.getCount();
-//			if(lostNo > 0){
-//				bu.setOriginalCount(bu.getOriginalCount() - lostNo);
-//				log.info("一个单位："+bu.getTroopId()+"数目由"+(bu.getOriginalCount()+lostNo)+"变为"+bu.getOriginalCount());
-//				//currentRoundPb.addLost(bu.getTroopId(), lostNo, type, isOffence);
-//			}
-//			if(bu.getHp() <= 0){
-//				itr.remove();
-//
-//				FieldPosition fieldPosition = isOffence ?
-//						battleField.getFieldPositionsForOffence().get(type)
-//						: battleField.getFieldPositionsForDefence().get(type);
-//				Slot slot = fieldPosition.getSlots().get(bu.getSlotNum());
-//				slot.remove(bu);
-//				log.info("一个单位退场" + bu.getTroopId() + "," + bu.getBattleFieldType());
-//			}
-//		}
 	}
 
 	private void armyInPosition(BattleField battleField) {
-		log.info("进攻方军队上场");
+
 		for(BattleFieldType type : BattleField.positionOrder){
-			FieldPosition position = battleField.getFieldPositionsForOffence().get(type);
+			log.info("进攻方"+type+"位置上场");
+			FieldPosition position = battleField.getFieldPositionByType(BattleField.OFFENCE, type);
 			for(Slot slot : position.getSlots()){
 				Slot bunit = null;
 				if(hasNextUnit(battleField.getArmysOffence(), type, slot)){
@@ -582,25 +549,23 @@ public class BattleLogic {
 						slot = slot.add(bunit);
 				}
 			}
-		}
-		log.info("防守方军队上场");
-		for(FieldPosition position : battleField.getFieldPositionsForDefence().values()){
+			log.info("防守方"+type+"位置上场");
+			position = battleField.getFieldPositionByType(BattleField.DEFENCE, type);
 			if(position.getType() == BattleFieldType.FIELD_CLOSE
-					&& battleField.getFieldPositionsForDefence().get(BattleFieldType.FIELD_CLOSE).getSlot(0).isFortificationUnit()){
+					&& battleField.getFieldPositionByType(BattleField.DEFENCE, BattleFieldType.FIELD_CLOSE).getSlot(0).isFortificationUnit()){
 				continue;
 			}
-			for(BattleFieldType type : BattleField.positionOrder){
-				for(Slot slot : position.getSlots()){
-					Slot bunit = null;
-					if(hasNextUnit(battleField.getArmysDefence(), type, slot)){
-						bunit = getNextUnit(battleField.getArmysOffence(), type, slot);
-						if(bunit != null)
-							slot = slot.add(bunit);
-					}
+
+			for(Slot slot : position.getSlots()){
+				Slot bunit = null;
+				if(hasNextUnit(battleField.getArmysDefence(), type, slot)){
+					bunit = getNextUnit(battleField.getArmysOffence(), type, slot);
+					if(bunit != null)
+						slot = slot.add(bunit);
 				}
 			}
 		}
-		
+
 	}
 
 	private Slot getNextUnit(List<Army> armys, BattleFieldType type, Slot slot) {

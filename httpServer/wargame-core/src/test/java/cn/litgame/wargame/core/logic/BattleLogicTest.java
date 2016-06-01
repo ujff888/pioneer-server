@@ -26,13 +26,13 @@ public class BattleLogicTest {
 	ConfigLogic configLogic = context.getBean(ConfigLogic.class);
 	JedisPool pool = (JedisPool) context.getBean("jedisStoragePool");
 	
-	//@Before
+	@Before
 	public void init(){
 		configLogic.loadConfig(this.getClass().getResource("/pb.bytes").getPath());
 	}
 
 	
-	//@Test
+	@Test
 	public void test(){
 		BattleGround bg = configLogic.getBattleGround(1, 1);
 		
@@ -123,22 +123,9 @@ public class BattleLogicTest {
 
 
 		BattleField field = battleLogic.initBattleField(armysOffence, armysDefence, bg, BattleField.LAND, 1);
-		battleLogic.saveBattleField(field);
-		GameProtos.BattleResult result = battleLogic.fight();
+		//battleLogic.saveBattleField(field);
+		GameProtos.BattleResult result = battleLogic.fight(field);
 		Assert.assertEquals(GameProtos.BattleResult.DEFENCE_WIN, result);
-		log.info(battleLogic.loadBattleField());
+		//log.info(battleLogic.loadBattleField());
 	}
 }
-class Entry{
-	int i;
-	String value;
-	
-	public Entry(int i, String v){
-		this.i = i;
-		this.value = v;
-	}
-	public String toString(){
-		return i + "," + value;
-	}
-}
-

@@ -77,6 +77,7 @@ public class Slot{
 	
 	public void clear() {
 		this.size = 0;
+		this.resTroopId = EMPTY_TROOP_ID;
 	}
 	
 	public int getOriginalHp() {
@@ -223,7 +224,16 @@ public class Slot{
 		return this;
 	}
 	
-	public Slot substract(Slot slot){
+	public Slot subtract(Slot slot){
+		return this;
+	}
+
+	public Slot subtract(int num) {
+		int oldCount = this.originalCount;
+		this.attack = this.attack/oldCount*(oldCount-num);
+		this.attack2 = this.attack2/oldCount*(oldCount-num);
+		this.defense = this.defense/oldCount*(oldCount-num);
+		this.originalCount -= num;
 		return this;
 	}
 	

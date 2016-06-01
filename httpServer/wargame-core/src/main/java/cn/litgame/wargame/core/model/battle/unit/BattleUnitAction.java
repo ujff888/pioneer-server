@@ -1,12 +1,5 @@
 package cn.litgame.wargame.core.model.battle.unit;
 
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
-import org.apache.log4j.Logger;
-
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
 import cn.litgame.wargame.core.auto.GameResProtos.TroopType;
 import cn.litgame.wargame.core.logic.BattleLogic;
@@ -14,6 +7,12 @@ import cn.litgame.wargame.core.model.battle.BattleField;
 import cn.litgame.wargame.core.model.battle.Damage;
 import cn.litgame.wargame.core.model.battle.FieldPosition;
 import cn.litgame.wargame.core.model.battle.Slot;
+import org.apache.log4j.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
 
 public abstract class BattleUnitAction {
 	
@@ -50,9 +49,10 @@ public abstract class BattleUnitAction {
 				if(enemy.get(type) == null){
 					continue;
 				}
-				int size = enemy.get(type).getSlotsWithTroop().size();
+				List<Slot> targets = enemy.get(type).getSlotsWithTroop();
+				int size = targets.size();
 				if(size >= targetCount){
-					if((enemy.get(type).getSlot(0).isFortificationUnit()) && !(slot.isFireUnit())){
+					if((targets.get(0).isFortificationUnit()) && !(slot.isFireUnit())){
 						log.info("面对城墙，攻击无效");
 						return;
 					}
@@ -61,7 +61,7 @@ public abstract class BattleUnitAction {
 					return;
 				}else{
 					if(size > 0){
-						if((enemy.get(type).getSlot(0).isFortificationUnit()) && !(slot.isFireUnit())){
+						if((targets.get(0).isFortificationUnit()) && !(slot.isFireUnit())){
 							log.info("面对城墙，攻击无效");
 							totalDamage -= totalDamage/targetCount*size;
 							targetCount -= size;

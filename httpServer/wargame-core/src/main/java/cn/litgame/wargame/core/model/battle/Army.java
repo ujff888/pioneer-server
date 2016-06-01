@@ -1,12 +1,5 @@
 package cn.litgame.wargame.core.model.battle;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import cn.litgame.wargame.core.auto.GameProtos;
 import cn.litgame.wargame.core.auto.GameResProtos.BattleFieldType;
 import cn.litgame.wargame.core.auto.GameResProtos.ResTroop;
@@ -14,6 +7,8 @@ import cn.litgame.wargame.core.auto.GameResProtos.TroopType;
 import cn.litgame.wargame.core.logic.ConfigLogic;
 import cn.litgame.wargame.core.logic.SpringContext;
 import cn.litgame.wargame.core.model.BattleTroop;
+
+import java.util.*;
 
 /**
  * 军队的抽象
@@ -183,7 +178,7 @@ public class Army{
 			if(this.getBackupBattleTroopsByType(TroopType.FIRE).size() > 0){
 				if(slot.isEmpty()){
 					return true;
-				}else{
+				}else if(slot.isFrom(this)){
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FIRE)){
 						if(bt.getResTroop().getId() == slot.getResTroopId()){
 							return true;
@@ -196,7 +191,7 @@ public class Army{
 			if(this.getBackupBattleTroopsByType(TroopType.FLY_FIRE).size() > 0){
 				if(slot.isEmpty()){
 					return true;
-				}else{
+				}else if(slot.isFrom(this)){
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
 						if(bt.getResTroop().getId() == slot.getResTroopId()){
 							return true;
@@ -209,7 +204,7 @@ public class Army{
 			if(this.getBackupBattleTroopsByType(TroopType.REMOTE).size() > 0){
 				if(slot.isEmpty()){
 					return true;
-				}else{
+				}else if(slot.isFrom(this)){
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.REMOTE)){
 						if(bt.getResTroop().getId() == slot.getResTroopId()){
 							return true;
@@ -222,7 +217,7 @@ public class Army{
 			if(this.getBackupBattleTroopsByType(TroopType.WEIGHT).size() > 0){
 				if(slot.isEmpty()){
 					return true;
-				}else{
+				}else if(slot.isFrom(this)){
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.WEIGHT)){
 						if(bt.getResTroop().getId() == slot.getResTroopId()){
 							return true;
@@ -231,17 +226,25 @@ public class Army{
 				}
 			}else{
 				if(this.getBackupBattleTroopsByType(TroopType.LIGHT).size() > 0){
-					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.LIGHT)){
-						if(bt.getResTroop().getId() == slot.getResTroopId()){
-							return true;
+					if(slot.isEmpty()){
+						return true;
+					} else if(slot.isFrom(this)){
+						for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.LIGHT)){
+							if(bt.getResTroop().getId() == slot.getResTroopId()){
+								return true;
+							}
 						}
 					}
 				}else{
 					//没有弹药的远程
 					if(this.getBackupBattleTroopsByType(TroopType.REMOTE_NO_AMMO).size() > 0){
-						for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.REMOTE_NO_AMMO)){
-							if(bt.getResTroop().getId() == slot.getResTroopId()){
-								return true;
+						if(slot.isEmpty()){
+							return true;
+						} else if(slot.isFrom(this)){
+							for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.REMOTE_NO_AMMO)){
+								if(bt.getResTroop().getId() == slot.getResTroopId()){
+									return true;
+								}
 							}
 						}
 					}
@@ -252,7 +255,7 @@ public class Army{
 			if(this.getBackupBattleTroopsByType(TroopType.LIGHT).size() > 0){
 				if(slot.isEmpty()){
 					return true;
-				}else{
+				}else if(slot.isFrom(this)){
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.LIGHT)){
 						if(bt.getResTroop().getId() == slot.getResTroopId()){
 							return true;
@@ -265,7 +268,7 @@ public class Army{
 			if( this.getBackupBattleTroopsByType(TroopType.FLY_AIR).size() > 0){
 				if(slot.isEmpty()){
 					return true;
-				}else{
+				}else if(slot.isFrom(this)){
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_AIR)){
 						if(bt.getResTroop().getId() == slot.getResTroopId()){
 							return true;
@@ -305,7 +308,7 @@ public class Army{
 					nextUnit = new Slot(temp, count, this.playerId, this.cityId);
 					nextUnit = nextUnit.add(slot);
 					return nextUnit;
-				}else{
+				}else if(slot.isFrom(this)){
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
 						if(bt.getResTroop().getId() == slot.getResTroopId()
 								&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
@@ -316,6 +319,7 @@ public class Army{
 
 							nextUnit = new Slot(bt, count, this.playerId, this.cityId);
 							nextUnit = nextUnit.add(slot);
+							return nextUnit;
 						}
 					}
 				}
@@ -336,7 +340,7 @@ public class Army{
 					nextUnit = new Slot(temp, count, this.playerId, this.cityId);
 					nextUnit = nextUnit.add(slot);
 					return nextUnit;
-				}else{
+				}else if(slot.isFrom(this)){
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
 						if(bt.getResTroop().getId() == slot.getResTroopId()
 								&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
@@ -347,6 +351,7 @@ public class Army{
 
 							nextUnit = new Slot(bt, count, this.playerId, this.cityId);
 							nextUnit = nextUnit.add(slot);
+							return nextUnit;
 						}
 					}
 				}
@@ -367,7 +372,7 @@ public class Army{
 					nextUnit = new Slot(temp, count, this.playerId, this.cityId);
 					nextUnit = nextUnit.add(slot);
 					return nextUnit;
-				}else{
+				}else if(slot.isFrom(this)){
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
 						if(bt.getResTroop().getId() == slot.getResTroopId()
 								&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
@@ -399,7 +404,7 @@ public class Army{
 					nextUnit = new Slot(temp, count, this.playerId, this.cityId);
 					nextUnit = nextUnit.add(slot);
 					return nextUnit;
-				}else{
+				}else if(slot.isFrom(this)){
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
 						if(bt.getResTroop().getId() == slot.getResTroopId()
 								&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
@@ -431,7 +436,7 @@ public class Army{
 					nextUnit = new Slot(temp, count, this.playerId, this.cityId);
 					nextUnit = nextUnit.add(slot);
 					return nextUnit;
-				}else{
+				}else if(slot.isFrom(this)){
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
 						if(bt.getResTroop().getId() == slot.getResTroopId()
 								&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
@@ -462,7 +467,7 @@ public class Army{
 					nextUnit = new Slot(temp, count, this.playerId, this.cityId);
 					nextUnit = nextUnit.add(slot);
 					return nextUnit;
-				}else{
+				}else if(slot.isFrom(this)){
 					for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
 						if(bt.getResTroop().getId() == slot.getResTroopId()
 								&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
@@ -491,7 +496,7 @@ public class Army{
 						nextUnit = new Slot(temp, count, this.playerId, this.cityId);
 						nextUnit = nextUnit.add(slot);
 						return nextUnit;
-					}else{
+					}else if(slot.isFrom(this)){
 						for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
 							if(bt.getResTroop().getId() == slot.getResTroopId()
 									&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){
@@ -519,7 +524,7 @@ public class Army{
 						nextUnit = new Slot(temp, count, this.playerId, this.cityId);
 						nextUnit = nextUnit.add(slot);
 						return nextUnit;
-					}else{
+					}else if(slot.isFrom(this)){
 						for(BattleTroop bt : this.getBackupBattleTroopsByType(TroopType.FLY_FIRE)){
 							if(bt.getResTroop().getId() == slot.getResTroopId()
 									&& (count = slot.getFreeSpace()/bt.getResTroop().getSpace()) > 0){

@@ -232,7 +232,7 @@ public abstract class BattleUnit implements Serializable{
 		this.setBattleFieldType(position.getType());
 		this.setSlotNum(slot.getNum());
 
-		slot.add(this);
+		//slot.add(this);
 		log.info("一个单位"+this.troopId+"上场，位置:"+position.getType()+" 数目："+this.getCount());
 	}
 	
