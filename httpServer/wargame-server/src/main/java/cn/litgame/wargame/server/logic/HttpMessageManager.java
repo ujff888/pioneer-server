@@ -38,37 +38,6 @@ public class HttpMessageManager {
 	@Resource(name = "configLogic")
 	private ConfigLogic configLogic;
 	
-//	@Resource(name = "cityHandler")
-//	private CityHandler cityHandler;
-//	
-//	@Resource(name = "mapHandler")
-//	private MapHandler mapHandler;
-//	
-//	@Resource(name = "loginHandler")
-//	private LoginHandler loginHandler;
-//	
-//	@Resource(name = "playerHandler")
-//	private PlayerHandler playerHandler;
-//	
-//	@Resource(name = "friendHandler")
-//	private FriendHandler friendHandler;
-//	
-//	@Resource(name = "mailHandler")
-//	private MailHandler mailHandler;
-//	
-//	@Resource(name = "battleHandler")
-//	private BattleHandler battleHandler;
-//
-//	@Resource(name = "shipHandler")
-//	private ShipHandler shipHandler;
-
-//	
-//	@Resource(name = "packItemHandler")
-//	private PackItemHandler packItemHandler;
-//	
-//	@Resource(name = "shopItemHandler")
-//	private ShopItemHandler shopHandler;
-	
 	private List<KHttpMessageHandler> handlers = new ArrayList<KHttpMessageHandler>();
 	
 	public void registHandler(KHttpMessageHandler handler){
@@ -80,48 +49,7 @@ public class HttpMessageManager {
 	 */
 	@PostConstruct
 	public void init(){
-		boolean a;
-//		SAXReader saxReader = new SAXReader();
-//		String classpath = this.getClass().getClassLoader().getResource("").getPath();
-//        Document document = null;
-//        Element status = null;
-//        XMLWriter xmlWriter = null;
-//		try {
-//			document = saxReader.read(new File( classpath + "/configLoaded.xml"));
-//			Element root = document.getRootElement();
-//	        status = root.element("status");
-//	        
-//			status.setText("0");//0表示尚未开始读取配置文件
-//			OutputFormat format = new OutputFormat("", false);// 设置缩进为0个空格，并且另起一行为false
-//	       
-//	        
-			a = configLogic.loadConfig(HttpMessageManager.class.getResource("/pb.bytes").getPath());
-
-//			status.setText("1");//1表示读取成功
-//			if(!a){
-//				status.setText("2");//2表示读取失败
-//			}
-//			xmlWriter = new XMLWriter(new FileOutputStream(classpath + "/configLoaded.xml"), format);
-//			xmlWriter.write(document);
-//			
-//			
-//		} catch (Exception e1) {
-//			log.error("configLoaded.xml读取失败！",e1);
-//			status.setText("2");
-//		}finally{
-//			try {
-//				if(xmlWriter != null){
-//					xmlWriter.close();
-//				}
-//				
-//			} catch (IOException e) {
-//				log.error("xml write error", e);
-//			}
-//		}
-//		
-//		if(status.getText().compareTo("1")!=0){
-//			throw new RuntimeException("load config error");
-//		}
+		boolean a = configLogic.loadConfig(HttpMessageManager.class.getResource("/pb.bytes").getPath());
 	}
 	
 	public City getCityContext(){
@@ -162,7 +90,7 @@ public class HttpMessageManager {
 	
 	/**
 	 * 处理具体消息所对应的逻辑
-	 * @param messageContent
+	 * @param messagebody
 	 */
 	public void handler(MessageBody messagebody){
 		MessageBody.Builder builder = MessageBody.newBuilder();
@@ -205,11 +133,11 @@ public class HttpMessageManager {
 		}
 		
 		for(KHttpMessageHandler handler : handlers){
-			if(handler.handler(messagebody) == KHttpMessageHandler.CATCH_HANDLER){
+			if(handler.handle(messagebody)){
 				return;
 			}
 		}
-		throw new RuntimeException("not catch handler,messageType="+messagebody.getMessageType());
+		throw new RuntimeException("not catch handle,messageType="+messagebody.getMessageType());
 	}
 	
 	/**

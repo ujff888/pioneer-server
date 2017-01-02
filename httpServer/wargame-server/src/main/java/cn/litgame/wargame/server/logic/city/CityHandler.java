@@ -13,7 +13,7 @@ public class CityHandler extends KHttpMessageHandler{
 	@Resource(name = "cityProcess")
 	private CityProcess cityProcess;
 	
-	public int handler(MessageBody messageBody) {
+	public boolean handle(MessageBody messageBody) {
 		switch(messageBody.getMessageType()){
 		case MSG_ID_BUILD_LEVEL_UP:
 			cityProcess.buildLevelUp(messageBody.getCsBuildLevelUp());

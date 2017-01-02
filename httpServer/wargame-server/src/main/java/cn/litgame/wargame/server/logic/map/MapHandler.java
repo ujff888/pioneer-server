@@ -14,7 +14,7 @@ public class MapHandler extends KHttpMessageHandler {
 	private MapProcess mapProcess;
 	
 	@Override
-	public int handler(MessageBody messageBody) {
+	public boolean handle(MessageBody messageBody) {
 		switch(messageBody.getMessageType()){
 		case MSG_ID_SHOW_WORLD:
 			mapProcess.showWorld(messageBody.getCsShowWorld());

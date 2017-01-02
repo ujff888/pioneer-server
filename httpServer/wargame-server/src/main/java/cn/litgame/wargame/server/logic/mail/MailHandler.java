@@ -14,9 +14,9 @@ public class MailHandler extends KHttpMessageHandler{
 	private MailProcess mailProcess;
 	
 	@Override
-	public int handler(MessageBody messageBody) {
+	public boolean handle(MessageBody messageBody) {
 		// TODO Auto-generated method stub
-		return 0;
+		return false;
 	}
 
 }

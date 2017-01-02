@@ -14,7 +14,7 @@ public class PlayerHandler extends KHttpMessageHandler{
 	private PlayerProcess playerProcess;
 	
 	@Override
-	public int handler(MessageBody mb) {
+	public boolean handle(MessageBody mb) {
 		switch(mb.getMessageType()){
 		case MSG_ID_CREATE_PLAYER:
 			playerProcess.createNewPlayer(mb.getCsCreatePlayer());

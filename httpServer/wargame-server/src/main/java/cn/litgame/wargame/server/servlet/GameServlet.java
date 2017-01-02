@@ -76,7 +76,7 @@ public class GameServlet {
 			MessageBody mb = context.getSimpleKHttpMessage().getMessageBody();
 			long startTime = System.currentTimeMillis();
 			httpMessageManager.handler(mb);
-			log.info("end handl message type : " + mb.getMessageType() +" use time: "+ (System.currentTimeMillis()-startTime));
+			log.info("end handle message type : " + mb.getMessageType() +" use time: "+ (System.currentTimeMillis()-startTime));
 		}catch(Exception e){
 			log.error(e.getMessage(), e);
 //				MessageContent.Builder builder = HttpMessageManager.getMessageContentBuilder();

@@ -12,7 +12,7 @@ public class MilitaryHandler extends KHttpMessageHandler {
 	private MilitaryProcess militaryProcess;
 	
 	@Override
-	public int handler(MessageBody messageBody) {
+	public boolean handle(MessageBody messageBody) {
 		switch(messageBody.getMessageType()){
 		case MSG_ID_MILITARY_INFO:
 			militaryProcess.militaryInfo(messageBody.getCsMilitaryInfo());

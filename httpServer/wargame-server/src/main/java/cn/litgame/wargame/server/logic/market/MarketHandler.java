@@ -14,7 +14,7 @@ public class MarketHandler extends KHttpMessageHandler {
 	private MarketProcess marketProcess;
 	
 	@Override
-	public int handler(MessageBody messageBody) {
+	public boolean handle(MessageBody messageBody) {
 		switch(messageBody.getMessageType()){
 		case MSG_ID_QUERY_MARKET_ORDER:
 			marketProcess.queryMarketOrder(messageBody.getCsQueryMarketOrder());
