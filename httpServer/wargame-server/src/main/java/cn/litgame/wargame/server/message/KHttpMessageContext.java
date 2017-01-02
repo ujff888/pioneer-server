@@ -108,7 +108,7 @@ public class KHttpMessageContext {
 				builder.setMessageCode(MessageCode.OK);
 			}
 			MessageBody mc = builder.build();
-			log.debug("send:\n" + mc);
+			log.info("send:\n" + mc);
 			byte[] bytes = mc.toByteArray();
 			mp.getOutputStream().write(bytes);
 			mp.getOutputStream().flush();

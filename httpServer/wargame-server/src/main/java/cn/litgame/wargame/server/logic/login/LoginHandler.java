@@ -14,7 +14,7 @@ public class LoginHandler extends KHttpMessageHandler{
 	private LoginProcess loginProcess;
 	
 	@Override
-	public int handler(MessageBody messageBody) {
+	public boolean handle(MessageBody messageBody) {
 		switch(messageBody.getMessageType()){
 		case MSG_ID_CHECK_VERSION:
 			loginProcess.checkVersion(messageBody.getCsCheckVersion());

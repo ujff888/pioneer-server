@@ -14,7 +14,7 @@ public class ShipHandler extends KHttpMessageHandler{
 	private ShipProcess shipProcess;
 
 	@Override
-	public int handler(MessageBody messageBody) {
+	public boolean handle(MessageBody messageBody) {
 		switch(messageBody.getMessageType()){
 		case MSG_ID_SHOW_BUY_SHIP:
 			shipProcess.showBuyShip(messageBody.getCsShowBuyShip());

@@ -13,7 +13,7 @@ public class BattleHandler  extends KHttpMessageHandler{
 	@Resource(name = "battleProcess")
 	private BattleProcess battleProcess;
 	
-	public int handler(MessageBody messageBody) {
+	public boolean handle(MessageBody messageBody) {
 		switch(messageBody.getMessageType()){
 		case MSG_ID_PRODUCTION_TROOP:
 			battleProcess.productionTroop(messageBody.getCsProductionTroop());

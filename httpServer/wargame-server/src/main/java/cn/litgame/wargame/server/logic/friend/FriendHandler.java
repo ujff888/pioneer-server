@@ -14,9 +14,9 @@ public class FriendHandler extends KHttpMessageHandler{
 	private FriendProcess friendProcess;
 	
 	@Override
-	public int handler(MessageBody messageBody) {
+	public boolean handle(MessageBody messageBody) {
 		// TODO Auto-generated method stub
-		return 0;
+		return false;
 	}
 
 }

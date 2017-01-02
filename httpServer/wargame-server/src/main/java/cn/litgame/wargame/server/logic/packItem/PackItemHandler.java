@@ -14,7 +14,7 @@ public class PackItemHandler extends KHttpMessageHandler {
 	private PackItemProcess packItemProcess;
 
 	@Override
-	public int handler(MessageBody messageBody) 
+	public boolean handle(MessageBody messageBody)
 	{
 
 		switch(messageBody.getMessageType())

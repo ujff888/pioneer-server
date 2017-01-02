@@ -82,7 +82,7 @@ public class SimpleKHttpMessage {
 			}
 			messageBody = GameProtos.MessageBody.parseFrom(buff);
 			this.code = 1;
-			log.debug(this.toString());
+			log.info(this.toString());
 		} catch (Exception e) {
 			log.error("sync client inputstream error",
 					e);

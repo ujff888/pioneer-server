@@ -18,15 +18,15 @@ public abstract class KHttpMessageHandler {
 	/**
 	 * 被处理器捕获到了
 	 */
-	public static final int CATCH_HANDLER = 1;
+	public static final boolean CATCH_HANDLER = true;
 	/**
 	 * 没有被处理器捕获到
 	 */
-	public static final int NOT_CATCH_HANDLER = 0;
+	public static final boolean NOT_CATCH_HANDLER = false;
 	/**
 	 * 捕获并处理的话返回1
-	 * @param messageContent
+	 * @param messageBody
 	 * @return
 	 */
-	public abstract int handler(MessageBody messageBody);
+	public abstract boolean handle(MessageBody messageBody);
 }

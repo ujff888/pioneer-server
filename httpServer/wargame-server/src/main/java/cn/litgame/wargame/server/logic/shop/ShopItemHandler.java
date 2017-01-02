@@ -14,7 +14,7 @@ public class ShopItemHandler extends KHttpMessageHandler {
 	private ShopItemProcess shopItemProcess;
 	
 	@Override
-	public int handler(MessageBody messageBody) 
+	public boolean handle(MessageBody messageBody)
 	{
 		switch(messageBody.getMessageType())
 		{
