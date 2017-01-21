@@ -80,6 +80,7 @@ public class SimpleKHttpMessage {
 			while(readCount < bodyLength){
 				readCount += inputStream.read(buff, readCount, bodyLength - readCount); 
 			}
+			//TODO:消息合法性校验
 			messageBody = GameProtos.MessageBody.parseFrom(buff);
 			this.code = 1;
 			log.info(this.toString());

@@ -1,18 +1,5 @@
 package cn.litgame.wargame.server.logic;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.stereotype.Service;
-
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 import cn.litgame.wargame.core.auto.GameGlobalProtos.MessageCode;
 import cn.litgame.wargame.core.auto.GameGlobalProtos.MessageType;
 import cn.litgame.wargame.core.auto.GameProtos.MessageBody;
@@ -23,6 +10,17 @@ import cn.litgame.wargame.core.model.City;
 import cn.litgame.wargame.core.model.Player;
 import cn.litgame.wargame.server.message.KHttpMessageContext;
 import cn.litgame.wargame.server.message.KHttpMessageHandler;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -37,7 +35,7 @@ public class HttpMessageManager {
 	
 	@Resource(name = "configLogic")
 	private ConfigLogic configLogic;
-	
+
 	private List<KHttpMessageHandler> handlers = new ArrayList<KHttpMessageHandler>();
 	
 	public void registHandler(KHttpMessageHandler handler){
@@ -55,7 +53,7 @@ public class HttpMessageManager {
 	public City getCityContext(){
 		return contexts.get().getCity();
 	}
-	
+
 	/**
 	 * 打上这个标记，就会自动刷新客户端的资源
 	 * @param city
@@ -92,7 +90,7 @@ public class HttpMessageManager {
 	 * 处理具体消息所对应的逻辑
 	 * @param messagebody
 	 */
-	public void handler(MessageBody messagebody){
+	public void handle(MessageBody messagebody){
 		MessageBody.Builder builder = MessageBody.newBuilder();
 		builder.setMessageType(messagebody.getMessageType());
 		contexts.get().init(builder);

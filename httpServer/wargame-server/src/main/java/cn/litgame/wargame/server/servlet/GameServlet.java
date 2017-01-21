@@ -66,7 +66,7 @@ public class GameServlet {
 		if(message.getCode() != 1){
 			log.error("syn error close this request");
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getOutputStream().flush();;
+			response.getOutputStream().flush();
 			return;
 		}
 		KHttpMessageContext context = new KHttpMessageContext(message);
@@ -75,7 +75,7 @@ public class GameServlet {
 		try{
 			MessageBody mb = context.getSimpleKHttpMessage().getMessageBody();
 			long startTime = System.currentTimeMillis();
-			httpMessageManager.handler(mb);
+			httpMessageManager.handle(mb);
 			log.info("end handle message type : " + mb.getMessageType() +" use time: "+ (System.currentTimeMillis()-startTime));
 		}catch(Exception e){
 			log.error(e.getMessage(), e);
