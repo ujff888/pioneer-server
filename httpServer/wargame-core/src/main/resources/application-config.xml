@@ -59,9 +59,9 @@
 	<bean id="jedisStoragePool" class="redis.clients.jedis.JedisPool">
 		<constructor-arg name="poolConfig" ref="jedisStoragePoolConfig" />
 		<constructor-arg name="host" value="${redis.storage.host}" />
-		<constructor-arg name="port" value="${redis.storage.port}" />
-		<constructor-arg name="timeout" value="${redis.storage.timeout}" />
-		<constructor-arg name="password" value="${redis.storage.password}" />
+		<constructor-arg name="port" value="${redis.storage.port}" type="int"/>
+		<constructor-arg name="timeout" value="${redis.storage.timeout}" type="int"/>
+		<!-- <constructor-arg name="password" value="${redis.storage.password}" /> -->
 	</bean>
 	
 	<bean id="jedisCachePoolConfig" class="redis.clients.jedis.JedisPoolConfig">
@@ -72,8 +72,8 @@
 	<bean id="jedisCachePool" class="redis.clients.jedis.JedisPool">
 		<constructor-arg name="poolConfig" ref="jedisCachePoolConfig" />
 		<constructor-arg name="host" value="${redis.cache.host}" />
-		<constructor-arg name="port" value="${redis.cache.port}" />
-		<constructor-arg name="timeout" value="${redis.cache.timeout}" />
-		<constructor-arg name="password" value="${redis.cache.password}" />
+		<constructor-arg name="port" value="${redis.cache.port}" type="int"/>
+		<constructor-arg name="timeout" value="${redis.cache.timeout}" type="int"/>
+		<!-- <constructor-arg name="password" value="${redis.cache.password}" /> -->
 	</bean>
 </beans>

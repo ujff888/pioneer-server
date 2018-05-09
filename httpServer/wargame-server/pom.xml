@@ -3,7 +3,6 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>cn.litgame</groupId>
     <artifactId>wargame-server</artifactId>
-    <packaging>war</packaging>
     <version>0.0.1-SNAPSHOT</version>
     <name>server Maven Webapp</name>
     <url>http://maven.apache.org</url>

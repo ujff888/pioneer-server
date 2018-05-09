@@ -14,12 +14,12 @@ public class SimpleKHttpMessage {
 
 	private InputStream inputStream;
 	private OutputStream outputStream;
-	private int code;//如果code != 1代表序列化失败，数据包不完整或非法
+	private int code;// 如果code != 1代表序列化失败，数据包不完整或非法
 	private int reservedKey;
 	private MessageBody messageBody;
 	private String ip;
 	private int bodyLength;
-	
+
 	public InputStream getInputStream() {
 		return inputStream;
 	}
@@ -28,7 +28,6 @@ public class SimpleKHttpMessage {
 		this.inputStream = inputStream;
 	}
 
-	
 	public OutputStream getOutputStream() {
 		return outputStream;
 	}
@@ -37,8 +36,6 @@ public class SimpleKHttpMessage {
 		this.outputStream = outputStream;
 	}
 
-	
-	
 	public int getCode() {
 		return code;
 	}
@@ -57,7 +54,7 @@ public class SimpleKHttpMessage {
 
 	public SimpleKHttpMessage(byte[] bs) {
 		try {
-			if(bs == null || bs.length == 0){
+			if (bs == null || bs.length == 0) {
 				throw new IllegalArgumentException("bs is null or length <=0");
 			}
 			this.messageBody = MessageBody.parseFrom(bs);
@@ -66,31 +63,29 @@ public class SimpleKHttpMessage {
 		}
 	}
 
-	public SimpleKHttpMessage(InputStream inputStream, OutputStream outputStream,
-			String ip, int bodyLength) throws IOException {
+	public SimpleKHttpMessage(InputStream inputStream, OutputStream outputStream, String ip, int bodyLength)
+			throws IOException {
 		this.inputStream = inputStream;
 		this.outputStream = outputStream;
 		this.ip = ip;
 		this.bodyLength = bodyLength;
-		
+
 		try {
-			
+
 			byte[] buff = new byte[bodyLength];
 			int readCount = 0;
-			while(readCount < bodyLength){
-				readCount += inputStream.read(buff, readCount, bodyLength - readCount); 
+			while (readCount < bodyLength) {
+				readCount += inputStream.read(buff, readCount, bodyLength - readCount);
 			}
-			//TODO:消息合法性校验
+			// TODO:消息合法性校验
 			messageBody = GameProtos.MessageBody.parseFrom(buff);
 			this.code = 1;
 			log.info(this.toString());
 		} catch (Exception e) {
-			log.error("sync client inputstream error",
-					e);
+			log.error("sync client inputstream error", e);
 			this.code = 0;
 		}
 	}
-
 
 	public String getIp() {
 		return ip;
@@ -102,9 +97,7 @@ public class SimpleKHttpMessage {
 
 	@Override
 	public String toString() {
-		return "SimpleKHttpMessage [inputStream=" + inputStream
-				+ ", outputStream=" + outputStream + ", reservedKey="
-				+ reservedKey + ", messageBody=" + messageBody + ", ip=" + ip
-				+ ", bodyLength=" + bodyLength + "]";
+		return "SimpleKHttpMessage [inputStream=" + inputStream + ", outputStream=" + outputStream + ", reservedKey="
+				+ reservedKey + ", messageBody=" + messageBody + ", ip=" + ip + ", bodyLength=" + bodyLength + "]";
 	}
 }

@@ -113,10 +113,13 @@ public class MarketLogic {
 	}
 	
 	public void updateCityOrderInfo(City city, CityOrderInfo order){
-		try(Jedis jedis = jedisStoragePool.getResource();){
+		Jedis jedis = jedisStoragePool.getResource();
+		try{
 			Transaction tx = jedis.multi();
 			tx.hset(this.buildLandKey(city.getLandId()), this.buildCityKey(city.getCityId()), order.toByteArray());
 			tx.exec();
+		}finally {
+			jedis.close();
 		}
 	}
 	

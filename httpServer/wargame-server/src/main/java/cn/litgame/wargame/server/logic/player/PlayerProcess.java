@@ -292,6 +292,7 @@ public class PlayerProcess extends KHttpMessageProcess {
 		ArrayList<RankItem> rankItemList = new ArrayList<>();
 		Iterator<Tuple> it = rankList.iterator();
 		
+		Jedis jedis;
 		while(it.hasNext()){
 			Tuple t = it.next();
 			
@@ -299,9 +300,12 @@ public class PlayerProcess extends KHttpMessageProcess {
 			Player playerInRank = playerLogic.getPlayer(Long.valueOf(t.getElement()));
 			
 			if(playerInRank == null){
-				try(Jedis jedis = jedisStoragePool.getResource();){
+				jedis = jedisStoragePool.getResource();
+				try{
 					jedis.zrem(rankLogic.getRankKey(sRankType), t.getElement());
 					continue;
+				}finally {
+					jedis.close();
 				}
 			}
 			

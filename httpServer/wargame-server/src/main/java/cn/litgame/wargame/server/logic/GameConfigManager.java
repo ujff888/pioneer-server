@@ -23,64 +23,70 @@ import cn.litgame.wargame.core.model.GameVersion;
 @Service
 public class GameConfigManager {
 	public static UUID64Tetris uuid;
-//	
-//	@Resource(name = "configManager")
-//	private ConfigManager configManager;
-//	
-//	
+	//
+	// @Resource(name = "configManager")
+	// private ConfigManager configManager;
+	//
+	//
 	@Resource(name = "gameServerMapper")
 	private GameServerMapper gameServerMapper;
-	
+
 	@Resource(name = "jedisStoragePool")
 	private JedisPool jedisStoragePool;
-	
+
 	@Resource(name = "chatLogic")
 	private ChatLogic chatLogic;
 
 	private boolean isShow;
 	private String isShowVersion;
-	
+
 	private String clientReleaseUrlIOS;
 	private String clientReleaseUrlUC;
 	private String clientReleaseUrl360;
 	private String clientReleaseUrlBAIDU;
 	private String clientReleaseUrlXIAOMI;
-	
+
 	private String clientResourceUrl;
 	private GameVersion serverVersion;
-	
+
 	private String sandBoxUrl;
 	private String verifyUrl;
 	private String bundleId;
 	private int appId;
 	private boolean isSandbox;
-	
+
 	private GameServer gameServer = new GameServer();
 	private String serverKey;
-	
+
 	public boolean isShow() {
 		return isShow;
 	}
+
 	public void setShow(boolean isShow) {
 		this.isShow = isShow;
 	}
+
 	public String getIsShowVersion() {
 		return isShowVersion;
 	}
+
 	public void setIsShowVersion(String isShowVersion) {
 		this.isShowVersion = isShowVersion;
 	}
-	public GameServer getGameServerConfig(){
+
+	public GameServer getGameServerConfig() {
 		return gameServer;
 	}
-	public String getAppleUrl(){
+
+	public String getAppleUrl() {
 		return this.isSandbox ? this.sandBoxUrl : this.verifyUrl;
 	}
-	public long getOldPlayerId(){
+
+	public long getOldPlayerId() {
 		String count = gameServerMapper.getConfig(this.serverKey);
-		
-		if(count == null){
-			Map<String,Object> params = new HashMap<String, Object>();
+
+		if (count == null) {
+			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("key", this.serverKey);
 			params.put("value", 0);
 			gameServerMapper.insertConfig(params);
@@ -88,16 +94,17 @@ public class GameConfigManager {
 		}
 		return Long.parseLong(count);
 	}
-//	
-	public void setOldPlayerId(long oldPlayerId){
-		Map<String,Object> params = new HashMap<String, Object>();
+
+	//
+	public void setOldPlayerId(long oldPlayerId) {
+		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("key", this.serverKey);
 		params.put("value", oldPlayerId);
 		gameServerMapper.updateConfig(params);
 	}
-	
-	public String getReleaseUrl(PlatformType type){
-		switch(type){
+
+	public String getReleaseUrl(PlatformType type) {
+		switch (type) {
 		case XIAOMI:
 			return this.clientReleaseUrlXIAOMI;
 		case A360:
@@ -108,42 +115,42 @@ public class GameConfigManager {
 			return this.clientReleaseUrlUC;
 		case BAIDU:
 			return this.clientReleaseUrlBAIDU;
-		default : throw new RuntimeException("platform type error,type = " + type);
+		default:
+			throw new RuntimeException("platform type error,type = " + type);
 		}
 	}
-	
-	public String getResourceUrl(){
+
+	public String getResourceUrl() {
 		return this.clientResourceUrl;
 	}
-	
-	public VersionStatus getClientVersionStatus(String version){
-		//为了苹果审核的过滤
-		if(isShowVersion.equals(version)){
+
+	public VersionStatus getClientVersionStatus(String version) {
+		// 为了苹果审核的过滤
+		if (isShowVersion.equals(version)) {
 			return VersionStatus.NORMAL;
 		}
-		if(version == null || !version.contains(".")){
+		if (version == null || !version.contains(".")) {
 			return VersionStatus.STOP;
 		}
 		GameVersion clientVersion = new GameVersion(version);
-		
-		if(clientVersion.getFirstNumber() != serverVersion.getFirstNumber()){
+
+		if (clientVersion.getFirstNumber() != serverVersion.getFirstNumber()) {
 			return VersionStatus.STOP;
 		}
-		if(clientVersion.getMiddleNumber() < serverVersion.getMiddleNumber()){
+		if (clientVersion.getMiddleNumber() < serverVersion.getMiddleNumber()) {
 			return VersionStatus.UPDATE;
 		}
-		if(clientVersion.getLasterNumber() != serverVersion.getLasterNumber()){
+		if (clientVersion.getLasterNumber() != serverVersion.getLasterNumber()) {
 			return VersionStatus.UPDATE;
 		}
-		if(clientVersion.getFirstNumber() == serverVersion.getFirstNumber() 
+		if (clientVersion.getFirstNumber() == serverVersion.getFirstNumber()
 				&& clientVersion.getMiddleNumber() == serverVersion.getMiddleNumber()
-				&& clientVersion.getLasterNumber() == serverVersion.getLasterNumber()){
+				&& clientVersion.getLasterNumber() == serverVersion.getLasterNumber()) {
 			return VersionStatus.NORMAL;
 		}
 		return VersionStatus.STOP;
 	}
-	
-	
+
 	public String getSandBoxUrl() {
 		return sandBoxUrl;
 	}
@@ -184,14 +191,12 @@ public class GameConfigManager {
 		this.isSandbox = isSandbox;
 	}
 
-
-	
 	@PostConstruct
-	public void loadConfig() throws Exception{
+	public void loadConfig() throws Exception {
 		Jedis jedis = this.jedisStoragePool.getResource();
-		try{
+		try {
 			Configuration config = new PropertiesConfiguration("conf.properties");
-			
+
 			this.appId = config.getInt("appId");
 			this.verifyUrl = config.getString("url.verify");
 			this.sandBoxUrl = config.getString("url.sandBox");
@@ -209,15 +214,15 @@ public class GameConfigManager {
 			gameServer.setRegion(config.getInt("server.region"));
 			gameServer.setServer(config.getInt("server.server"));
 			this.serverKey = gameServer.buildGameServerKey();
-		//	chatLogic.getWroldChatChannel(serverKey);
+			// chatLogic.getWroldChatChannel(serverKey);
 			uuid = UUID64Tetris.buildDefaultUUID(gameServer.getRegion(), gameServer.getServer(), this.getOldPlayerId());
-		}finally{
+		} finally {
 			jedis.close();
 		}
-		
+
 	}
-//	
-//	public SCUpdateList.Builder getUpdateList(GameVersion version){
-//		return null;
-//	}
+	//
+	// public SCUpdateList.Builder getUpdateList(GameVersion version){
+	// return null;
+	// }
 }

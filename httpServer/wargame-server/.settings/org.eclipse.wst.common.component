@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="wargame-server">
+        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+        <dependent-module archiveName="wargame-core.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/wargame-core/wargame-core">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="kriver-core.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/kriver-core/kriver-core">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="wargame-log.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/wargame-log/wargame-log">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="context-root" value="wargame-server"/>
+        <property name="java-output-path" value="/wargame-server/target/classes"/>
+    </wb-module>
+</project-modules>

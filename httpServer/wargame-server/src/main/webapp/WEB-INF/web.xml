@@ -1,14 +1,12 @@
-<!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
- 
-<web-app>
-  <welcome-file-list>
-	  <welcome-file>index</welcome-file>
-  </welcome-file-list>
-  
-  <display-name>wargame-server</display-name>
-  <context-param>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+	<welcome-file-list>
+		<welcome-file>index</welcome-file>
+	</welcome-file-list>
+
+	<display-name>wargame-server</display-name>
+	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath*:application-config.xml</param-value>
 	</context-param>
@@ -33,7 +31,7 @@
 		<filter-name>characterEncodingFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-  <servlet>
+	<servlet>
 		<servlet-name>spring-mvc</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet
 		</servlet-class>
@@ -48,9 +46,9 @@
 		<servlet-name>spring-mvc</servlet-name>
 		<url-pattern>*.lc</url-pattern>
 	</servlet-mapping>
-	<servlet-mapping>  
-  		<servlet-name>spring-mvc</servlet-name>  
-  		<url-pattern>/index</url-pattern>  
-	</servlet-mapping> 
-	
+	<servlet-mapping>
+		<servlet-name>spring-mvc</servlet-name>
+		<url-pattern>/index</url-pattern>
+	</servlet-mapping>
+
 </web-app>

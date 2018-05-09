@@ -48,6 +48,7 @@ public class HttpMessageManager {
 	@PostConstruct
 	public void init(){
 		boolean a = configLogic.loadConfig(HttpMessageManager.class.getResource("/pb.bytes").getPath());
+		System.out.println("HttpMessageManager init>"+(a?"true":"false"));
 	}
 	
 	public City getCityContext(){

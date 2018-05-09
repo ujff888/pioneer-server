@@ -106,8 +106,11 @@ public class BattleLogic {
 	public void saveBattleField(BattleField battleField) {
 		String redis_key = "battleField_cache";
 
-		try(Jedis jedis = jedisStoragePool.getResource()){
+		Jedis jedis = this.jedisStoragePool.getResource();
+		try{
 			jedis.set(redis_key.getBytes(), battleField.convertToProto().toByteArray());
+		}finally {
+			jedis.close();
 		}
 	}
 	

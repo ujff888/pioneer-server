@@ -51,7 +51,7 @@ public class Main
 //    	//CreateNewRoleTest createNewRoleTest = context.getBean(CreateNewRoleTest.class);
     	
     	args = new String[5];
-    	args[0] = "123.56.80.226" ;
+    	args[0] = "127.0.0.1" ;
     	args[1] = "8080";
     	args[2] = ""+LOGIN_STRATEGY;
     	args[3] = "1";
